@@ -1,134 +1,147 @@
-﻿# Assay — AI-Powered Candidate Ranking Pipeline
+# Assay — AI-Powered Candidate Ranking Pipeline
 
 > **Hackathon Submission** — India Runs Data & AI Challenge · Redrob Track
-> **Problem Statement**: Rank 100,000 candidates for a Search/ML Engineer role using intelligent, explainable AI.
+> Rank 100,000 candidates for a Search/ML Engineer role using intelligent, explainable AI.
 
 ---
 
 ## Overview
 
-Assay is a two-stage, CPU-only candidate ranking pipeline that processes 100K+ candidate profiles from a JSONL dataset and produces a ranked Top-100 list with plain-language recruiter reasoning. It is designed to be **merit-first, explainable, and anti-gaming**.
+Assay is a two-stage, CPU-only candidate ranking pipeline that processes 100K+ candidate profiles and produces a ranked Top-100 list with plain-language recruiter reasoning. Designed to be **merit-first, explainable, and anti-gaming**.
 
 ### Key Differentiators
 
 | Feature | What we do | Why it matters |
 |---|---|---|
-| **12 JD Facet Alignment** | Semantic cosine similarity across 4 core, 5 bonus, and 3 penalty facets | Goes beyond keyword matching |
-| **Verified Skill Multiplier** | Platform assessment scores (0-100) scale candidate scores by [0.50, 1.20] | Credentials verified, not self-reported |
-| **Anti-Keyword-Stuffing (4-Layer)** | Sentence co-occurrence + metric verification + density cap + assessment cross-check | Prevents gaming the system |
-| **Continuous Notice Period Curve** | Piecewise linear suitability: 1.0 (<=30d) to 0.80 floor (>=120d) | Merit-first, notice is a soft signal |
-| **Product Company Detection** | Tenure-weighted product vs. consulting ratio: +15% / -20% | Rewards real product depth |
-| **Factual Reasoning Engine** | 80-160 char recruiter summaries composed from structured data | Zero hallucination, fully deterministic |
+| **12 JD Facet Alignment** | Semantic cosine similarity across 4 core, 5 bonus, 3 penalty facets | Goes beyond keyword matching |
+| **Verified Skill Multiplier** | Platform assessment scores (0–100) scale candidate scores by [0.50, 1.20] | Credentials verified, not self-reported |
+| **Anti-Keyword-Stuffing** | 4-layer defense: co-occurrence + metric verification + density cap + assessment cross-check | Prevents gaming the system |
+| **Continuous Notice Period Curve** | Piecewise linear: 1.0 (≤30d) → 0.80 floor (≥120d) | Merit-first; notice is a soft signal |
+| **Product Company Detection** | Tenure-weighted product vs. consulting ratio: +15% / −20% | Rewards real product depth |
+| **Factual Reasoning Engine** | 80–160 char recruiter summaries from structured data | Zero hallucination, fully deterministic |
 
 ---
 
 ## Pipeline Architecture
 
-`
+```
 candidates.jsonl (100K profiles)
-        |
-        v
-+----------------------------------+
-|  STAGE 1: Pre-Filtering          |  rank.py (~45 seconds)
-|  DuckDB SQL - Location + Role    |
-|  Output: survivors.csv (~25K)    |
-+----------------+-----------------+
-                 |
-                 v
-+----------------------------------+
-|  STAGE 2: Scoring & Ranking      |  score_and_rank.py (~90 seconds)
-|                                  |
-|  1. Honeypot Purge               |
-|  2. Vector Alignment (12 facets) |
-|  3. Verified Skill Multiplier    |
-|  4. Behavioral Gating            |
-|  5. Product Co. Multiplier       |
-|  6. Tier Assignment + Sorting    |
-|  7. Reasoning + Export           |
-|                                  |
-|  Output: submission.csv (Top 100)|
-+----------------------------------+
-`
+         │
+         ▼
+ ┌───────────────────────┐
+ │  Stage 1 — rank.py    │  DuckDB SQL pre-filter
+ │  Location + Role      │  ~45 seconds
+ │  → survivors.csv      │  ~25K candidates
+ └──────────┬────────────┘
+            │
+            ▼
+ ┌───────────────────────┐
+ │  Stage 2              │  score_and_rank.py
+ │  score_and_rank.py    │  ~90 seconds
+ │                       │
+ │  1. Honeypot purge    │
+ │  2. Vector alignment  │  12 JD facets
+ │  3. Skill multiplier  │  verified scores
+ │  4. Behavioral gates  │
+ │  5. Product co. boost │
+ │  6. Tier + sort       │
+ │  7. Reasoning export  │
+ │                       │
+ │  → submission.csv     │  Top 100
+ └───────────────────────┘
+```
 
-**Total runtime: < 3 minutes | Peak RAM: ~4 GB | CPU-only | No network**
+**Total runtime: < 3 minutes · Peak RAM: ~4 GB · CPU-only · No network**
 
 ---
 
 ## Scoring Formula
 
-`
-core_score  = GeometricMean(4 core cosine similarities) x verified_skill_multiplier
+```
+core_score = GeometricMean(4 core cosine similarities) × verified_skill_multiplier
 
-base_fit    = 0.7 x core_score
-            + 0.2 x bonus_score
-            - 0.3 x penalty_score
-            + 0.05 x college_tier
-            + 0.05 x cgpa_norm
+base_fit   = 0.70 × core_score
+           + 0.20 × bonus_score
+           − 0.30 × penalty_score
+           + 0.05 × college_tier
+           + 0.05 × cgpa_norm
 
-base_fit    = base_fit x product_company_multiplier + shipped_search_boost
+base_fit   = base_fit × product_company_multiplier + shipped_search_boost
 
-final_score = base_fit x sqrt(availability_multiplier) x conversion_drag + location_boost
-`
+final_score = base_fit × sqrt(availability_multiplier) × conversion_drag + location_boost
+```
 
 ---
 
 ## Project Structure
 
-`
+```
 Assay/
-|
-+-- precompute_embeddings.py   # Offline: encode all profiles + JD facets
-+-- v2/
-|   +-- rank.py                # Stage 1: SQL pre-filtering via DuckDB
-|   +-- score_and_rank.py      # Stage 2: vectorized multi-signal scoring
-|
-+-- jd_facet_metadata.json     # 12 JD facet definitions (4 core, 5 bonus, 3 penalty)
-+-- requirements.txt
-+-- submission_metadata.yaml
-+-- README.md
-`
+├── precompute_embeddings.py   # One-time: encode all profiles + JD facets
+├── rank.py                    # Stage 1 (root copy)
+├── score_and_rank.py          # Stage 2 (root copy)
+├── jd_facet_metadata.json     # 12 JD facet definitions
+├── requirements.txt
+├── submission_metadata.yaml
+├── README.md
+└── v2/
+    ├── rank.py                # Stage 1 — competition version
+    ├── score_and_rank.py      # Stage 2 — competition version
+    ├── submission.csv         # Final Top-100 output
+    └── hackathon_submission.pptx
+```
 
-**Not included in repo** (large data files):
-- candidates.jsonl - 100K candidate dataset (~487 MB)
-- candidate_embeddings.parquet - Pre-computed embeddings (~148 MB)
-- survivors.csv - Stage 1 output (~93 MB)
+> Large data files are excluded from the repo:
+> `candidates.jsonl` (~487 MB), `candidate_embeddings.parquet` (~148 MB), `survivors.csv` (~93 MB)
 
 ---
 
 ## Setup & Usage
 
-### 1. Install Dependencies
+### 1. Install dependencies
 
-`ash
+```bash
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
-`
+```
 
-### 2. Precompute Embeddings (one-time, ~10 min)
+### 2. Precompute embeddings *(one-time, ~10 min)*
 
-`ash
-python precompute_embeddings.py --candidates candidates.jsonl --out-parquet candidate_embeddings.parquet --out-facets-npy jd_facet_embeddings.npy --out-facets-meta jd_facet_metadata.json
-`
+```bash
+python precompute_embeddings.py \
+  --candidates candidates.jsonl \
+  --out-parquet candidate_embeddings.parquet \
+  --out-facets-npy jd_facet_embeddings.npy \
+  --out-facets-meta jd_facet_metadata.json
+```
 
-### 3. Stage 1 - Pre-Filter
+### 3. Stage 1 — Pre-filter
 
-`ash
-python v2/rank.py --candidates candidates.jsonl --out v2/survivors.csv
-`
+```bash
+python v2/rank.py \
+  --candidates candidates.jsonl \
+  --out v2/survivors.csv
+```
 
-### 4. Stage 2 - Score & Rank
+### 4. Stage 2 — Score & rank
 
-`ash
-python v2/score_and_rank.py --survivors v2/survivors.csv --embeddings candidate_embeddings.parquet --facets-npy jd_facet_embeddings.npy --facets-meta jd_facet_metadata.json --candidates candidates.jsonl --out v2/submission.csv
-`
+```bash
+python v2/score_and_rank.py \
+  --survivors v2/survivors.csv \
+  --embeddings candidate_embeddings.parquet \
+  --facets-npy jd_facet_embeddings.npy \
+  --facets-meta jd_facet_metadata.json \
+  --candidates candidates.jsonl \
+  --out v2/submission.csv
+```
 
 ---
 
 ## Top 10 Results
 
 | Rank | Candidate ID | Score | Company | YoE | Location |
-|------|-------------|-------|---------|-----|----------|
+|------|-------------|------:|---------|----:|----------|
 | 1 | CAND_0041669 | 1.0000 | CRED | 8.0y | Noida |
 | 2 | CAND_0064326 | 0.7235 | Sarvam AI | 7.6y | Gurgaon |
 | 3 | CAND_0006418 | 0.7160 | Verloop.io | 5.7y | Gurgaon |
@@ -147,36 +160,35 @@ python v2/score_and_rank.py --survivors v2/survivors.csv --embeddings candidate_
 | Library | Version | Purpose |
 |---|---|---|
 | Python | 3.11 | Core pipeline |
-| DuckDB | 1.3.x | SQL streaming of JSONL, nested struct queries |
-| NumPy | 2.2.x | Vectorized cosine similarity matrix |
-| Pandas | 2.3.x | DataFrame orchestration |
-| sentence-transformers | 4.1.x | all-MiniLM-L6-v2 profile embeddings |
-| pyarrow | 20.x | Parquet I/O |
+| DuckDB | 1.5.3 | SQL streaming over JSONL with nested struct queries |
+| NumPy | 2.4.6 | Vectorized cosine similarity matrix |
+| Pandas | 3.0.3 | DataFrame orchestration and tiered sorting |
+| sentence-transformers | 5.5.1 | `all-MiniLM-L6-v2` — profile + JD facet embeddings |
+| pyarrow | 24.0.0 | Parquet I/O for pre-computed embeddings |
 
 ---
 
 ## Design Decisions
 
-### Why Geometric Mean over Arithmetic Mean for Core Score?
-Arithmetic mean allows a candidate to rescue their score by excelling in one facet while being weak in others. Geometric mean forces *balanced* competency across all 4 core facets. A candidate who scores 0.9/0.9/0.9/0.1 gets a geometric mean of 0.53 instead of an arithmetic 0.70.
+### Why geometric mean for core score?
+Arithmetic mean lets a candidate compensate a weak facet by excelling in another. Geometric mean enforces *balanced* competency — a 0.9/0.9/0.9/0.1 profile scores 0.53 (geometric) vs 0.70 (arithmetic). The JD requires all four core skills, not three.
 
-### Why a continuous Notice Period curve instead of a hard cutoff?
-Hard cutoffs create brittleness. A continuous piecewise linear curve from 1.0 (<=30 days) to a 0.80 floor (>=120 days) smoothly penalizes longer notice while ensuring it never completely eliminates an otherwise exceptional candidate.
+### Why a continuous notice period curve instead of a hard cutoff?
+A binary cutoff treats a 59-day and 61-day notice candidate as entirely different. A piecewise linear curve from 1.0 (≤30d) to a 0.80 floor (≥120d) smoothly penalises longer notice while never eliminating an otherwise exceptional candidate.
 
-### Why 4-layer anti-stuffing defense?
-Keyword matching is trivially gameable. The 4 layers (sentence co-occurrence, metric verification, keyword density cap, assessment cross-check) each independently close a different attack vector.
+### Why 4-layer anti-stuffing?
+Each layer closes a different attack vector independently: sentence co-occurrence (claims must have context), metric verification (numbers must appear near claims), density cap (frequency ceiling per skill), and assessment cross-check (platform score must corroborate self-reported expertise).
 
 ---
 
 ## Constraints Compliance
 
-| Constraint | Requirement | Achieved |
+| Constraint | Requirement | Result |
 |---|---|---|
-| Runtime | < 5 minutes | ~2.5 minutes total |
-| RAM | < 16 GB | ~4 GB peak |
-| Compute | CPU only | Zero GPU |
-| Network | No access | Fully offline |
-| Output | 100 ranked candidates | Exactly 100 |
-| Reasoning | 80-160 characters | All compliant |
-| Honeypots | 0 in Top 100 | Verified |
-
+| Runtime | < 5 minutes | ~2.5 min ✓ |
+| RAM | < 16 GB | ~4 GB peak ✓ |
+| Compute | CPU only | Zero GPU ✓ |
+| Network | No access | Fully offline ✓ |
+| Output | 100 ranked candidates | Exactly 100 ✓ |
+| Reasoning length | 80–160 characters | All compliant ✓ |
+| Honeypots in Top 100 | 0 | 0 ✓ |
