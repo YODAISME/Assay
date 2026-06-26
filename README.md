@@ -1,4 +1,4 @@
-﻿# ApexRank — AI-Powered Candidate Ranking Pipeline
+﻿# Assay — AI-Powered Candidate Ranking Pipeline
 
 > **Hackathon Submission** — India Runs Data & AI Challenge · Redrob Track
 > **Problem Statement**: Rank 100,000 candidates for a Search/ML Engineer role using intelligent, explainable AI.
@@ -7,7 +7,7 @@
 
 ## Overview
 
-ApexRank is a two-stage, CPU-only candidate ranking pipeline that processes 100K+ candidate profiles from a JSONL dataset and produces a ranked Top-100 list with plain-language recruiter reasoning. It is designed to be **merit-first, explainable, and anti-gaming**.
+Assay is a two-stage, CPU-only candidate ranking pipeline that processes 100K+ candidate profiles from a JSONL dataset and produces a ranked Top-100 list with plain-language recruiter reasoning. It is designed to be **merit-first, explainable, and anti-gaming**.
 
 ### Key Differentiators
 
@@ -75,7 +75,7 @@ final_score = base_fit x sqrt(availability_multiplier) x conversion_drag + locat
 ## Project Structure
 
 `
-apexrank/
+Assay/
 |
 +-- precompute_embeddings.py   # Offline: encode all profiles + JD facets
 +-- v2/
@@ -179,3 +179,4 @@ Keyword matching is trivially gameable. The 4 layers (sentence co-occurrence, me
 | Output | 100 ranked candidates | Exactly 100 |
 | Reasoning | 80-160 characters | All compliant |
 | Honeypots | 0 in Top 100 | Verified |
+

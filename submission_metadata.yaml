@@ -1,7 +1,7 @@
-﻿# ApexRank — Hackathon Submission Metadata
+﻿# Assay — Hackathon Submission Metadata
 # India Runs Data & AI Challenge · Redrob Track
 
-team_name: ApexRank
+team_name: Assay
 team_leader: YODAISME
 problem_statement: AI-Powered Candidate Ranking for Search/ML Engineer Role
 submission_version: v2
@@ -36,3 +36,4 @@ output:
   reasoning_length_range: [80, 160]
   score_range: [0.0, 1.0]
   monotonic: true
+
