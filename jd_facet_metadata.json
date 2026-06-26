@@ -1,0 +1,74 @@
+[
+  {
+    "label": "retrieval_systems",
+    "text": "Production experience with embeddings-based retrieval systems deployed to real users, handling embedding drift, index refresh, and retrieval-quality regression.",
+    "polarity": "positive",
+    "tier": "core"
+  },
+  {
+    "label": "vector_db_search",
+    "text": "Production experience with vector databases or hybrid search infrastructure such as Pinecone, Weaviate, Qdrant, Milvus, OpenSearch, Elasticsearch, or FAISS.",
+    "polarity": "positive",
+    "tier": "core"
+  },
+  {
+    "label": "python_engineering",
+    "text": "Strong Python software engineering with high code quality, used to build production machine learning systems.",
+    "polarity": "positive",
+    "tier": "core"
+  },
+  {
+    "label": "ranking_evaluation",
+    "text": "Designed evaluation frameworks for ranking systems, including NDCG, MRR, MAP, offline-to-online correlation, and A/B test interpretation.",
+    "polarity": "positive",
+    "tier": "core"
+  },
+  {
+    "label": "llm_finetuning",
+    "text": "LLM fine-tuning experience using LoRA, QLoRA, or PEFT techniques.",
+    "polarity": "positive",
+    "tier": "bonus"
+  },
+  {
+    "label": "learning_to_rank",
+    "text": "Experience building learning-to-rank models, either XGBoost-based or neural network based.",
+    "polarity": "positive",
+    "tier": "bonus"
+  },
+  {
+    "label": "hr_recruiting_marketplace",
+    "text": "Prior experience working on HR technology, recruiting technology, or marketplace products.",
+    "polarity": "positive",
+    "tier": "bonus"
+  },
+  {
+    "label": "distributed_systems",
+    "text": "Background in distributed systems or large-scale machine learning inference optimization.",
+    "polarity": "positive",
+    "tier": "bonus"
+  },
+  {
+    "label": "open_source",
+    "text": "Open-source contributions in the AI or machine learning space.",
+    "polarity": "positive",
+    "tier": "bonus"
+  },
+  {
+    "label": "framework_enthusiast",
+    "text": "No production systems built. Experience consists entirely of following online tutorials, writing blog posts about testing new APIs like LangChain or OpenAI, and building demo projects with no real users, no scale, and no engineering depth beyond gluing together existing libraries.",
+    "polarity": "negative",
+    "tier": "penalty"
+  },
+  {
+    "label": "cv_speech_robotics",
+    "text": "Primary expertise in computer vision, speech recognition, or robotics, without significant natural language processing or information retrieval exposure.",
+    "polarity": "negative",
+    "tier": "penalty"
+  },
+  {
+    "label": "closed_source_only",
+    "text": "Career spent entirely on closed-source proprietary internal systems with no external validation such as publications, conference talks, or open-source work.",
+    "polarity": "negative",
+    "tier": "penalty"
+  }
+]

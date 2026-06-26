@@ -1,0 +1,5 @@
+﻿duckdb==1.5.3
+numpy==2.4.6
+pandas==3.0.3
+pyarrow==24.0.0
+sentence-transformers==5.5.1

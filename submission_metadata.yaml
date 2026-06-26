@@ -1,0 +1,38 @@
+﻿# ApexRank — Hackathon Submission Metadata
+# India Runs Data & AI Challenge · Redrob Track
+
+team_name: ApexRank
+team_leader: YODAISME
+problem_statement: AI-Powered Candidate Ranking for Search/ML Engineer Role
+submission_version: v2
+
+pipeline:
+  stage_1:
+    script: v2/rank.py
+    runtime_seconds: 45
+    engine: DuckDB 1.5.3
+    description: SQL-based pre-filter from 100K to ~25K survivors
+  stage_2:
+    script: v2/score_and_rank.py
+    runtime_seconds: 90
+    engine: NumPy 2.4.6 + Pandas 3.0.3
+    description: Multi-signal vectorized scoring and Top-100 ranking
+
+embedding_model: sentence-transformers/all-MiniLM-L6-v2
+embedding_dim: 384
+facets_count: 12  # 4 core, 5 bonus, 3 penalty
+
+constraints:
+  max_runtime_seconds: 300
+  actual_runtime_seconds: 135
+  max_ram_gb: 16
+  actual_peak_ram_gb: 4
+  gpu_required: false
+  network_required: false
+
+output:
+  candidates_ranked: 100
+  honeypot_rate: 0.0
+  reasoning_length_range: [80, 160]
+  score_range: [0.0, 1.0]
+  monotonic: true
