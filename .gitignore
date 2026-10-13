@@ -1,9 +1,16 @@
-﻿# Data files (too large for git)
+# Data files (too large for git)
 candidates.jsonl
 candidate_embeddings.parquet
 survivors.csv
 v2/survivors.csv
 final_submission*.csv
+submission.csv
+*.npz
+
+# Temporary files & office locks
+~$*
+Assay_Database_Design*.docx
+Assay_Database_Design*.pdf
 
 # Python
 __pycache__/
@@ -23,5 +30,3 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
-
-Assay_Database_Design.docx

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Assay — AI Candidate Ranking &amp; Talent Intelligence</title>
+  
+  <!-- Google Fonts: Libre Caslon Text & Hanken Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&amp;family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+  
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#FAF9F7",
+            "surface": "#F4F3F1",
+            "surface-dim": "#EFEEEC",
+            "blob-coral": "#FFB4A2",
+            "blob-coral-soft": "#FFD1D1",
+            "blob-blue": "#A2D2FF",
+            "blob-blue-soft": "#D1E8FF",
+            "blob-mint": "#B2F2BB",
+            "blob-mint-soft": "#E8FFD1",
+            "text-primary": "#1A1C1B",
+            "text-medium": "#5F5E5B",
+            "brand-black": "#000000"
+          },
+          fontFamily: {
+            serif: ['"Libre Caslon Text"', 'serif'],
+            sans: ['"Hanken Grotesk"', 'sans-serif']
+          },
+          borderRadius: {
+            '3xl': '1.75rem',
+            '4xl': '2.25rem'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #FAF9F7;
+      color: #1A1C1B;
+      font-family: 'Hanken Grotesk', sans-serif;
+      overflow-x: hidden;
+    }
+    .font-serif {
+      font-family: 'Libre Caslon Text', serif;
+    }
+    /* Liquid Light Glass Tokens */
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.25) 100%);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.04);
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.80);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.70);
+    }
+    /* Ambient Liquid Pastel Blobs */
+    .ambient-blob {
+      position: fixed;
+      border-radius: 9999px;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.60;
+    }
+    /* Custom Slider Styling */
+    input[type=range] {
+      accent-color: #000000;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen relative selection:bg-black selection:text-white pb-24">
+
+  <!-- Ambient Liquid Pastel Blobs -->
+  <div class="ambient-blob w-[500px] h-[500px] bg-blob-coral top-[-100px] left-[-100px]"></div>
+  <div class="ambient-blob w-[600px] h-[600px] bg-blob-blue top-[150px] right-[-150px]"></div>
+  <div class="ambient-blob w-[550px] h-[550px] bg-blob-mint bottom-[50px] left-[20%]"></div>
+
+  <!-- Primary Wrapper -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-6">
+
+    <!-- 1. Floating Suspended Header -->
+    <header class="glass-pill rounded-full px-6 py-3.5 mb-8 flex items-center justify-between shadow-sm">
+      <div class="flex items-center space-x-4">
+        <div class="w-9 h-9 bg-black rounded-full flex items-center justify-center text-white font-serif font-bold text-lg shadow-sm">
+          A
+        </div>
+        <div>
+          <span class="font-serif text-xl tracking-tight font-bold text-text-primary">Assay</span>
+          <span class="text-xs uppercase tracking-widest text-text-medium ml-2 font-medium">Talent Intelligence</span>
+        </div>
+        <div class="hidden md:flex items-center space-x-2 pl-4 border-l border-black/10">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-text-medium font-medium">Search &amp; ML Benchmark — 100K Pool</span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button id="btn-export-csv" class="glass-pill text-xs font-semibold px-4 py-2 rounded-full text-black hover:bg-white transition flex items-center space-x-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-sm">download</span>
+          <span>Export CSV</span>
+        </button>
+        <button id="btn-run-pipeline" class="bg-black text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-black/85 transition flex items-center space-x-1.5 shadow-md">
+          <span class="material-symbols-outlined text-sm">play_arrow</span>
+          <span>Run Pipeline</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Telemetry HUD Bar -->
+    <section class="glass-card rounded-3xl p-6 mb-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="border-r border-black/5 last:border-0 pr-4">
+        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Total Pool</div>
+        <div class="font-serif text-3xl font-bold text-text-primary" id="tele-total">100,000</div>
+        <div class="text-xs text-text-medium mt-1">Initial indexed ingestion</div>
+      </div>
+      <div class="border-r border-black/5 last:border-0 pr-4">
+        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">SQL Survivors</div>
+        <div class="font-serif text-3xl font-bold text-text-primary" id="tele-survivors">24,812</div>
+        <div class="text-xs text-text-medium mt-1">Hard filter &amp; role pass</div>
+      </div>
+      <div class="border-r border-black/5 last:border-0 pr-4">
+        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Shortlisted</div>
+        <div class="font-serif text-3xl font-bold text-text-primary" id="tele-shortlisted">Top 100</div>
+        <div class="text-xs text-text-medium mt-1">Deterministic vector cohort</div>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Spammer Rate</div>
+        <div class="font-serif text-3xl font-bold text-emerald-700" id="tele-spammer">0.0%</div>
+        <div class="text-xs text-text-medium mt-1">Anti-gaming verified</div>
+      </div>
+    </section>
+
+    <!-- 3. Quick Tuning Strip -->
+    <section class="glass-card rounded-3xl p-6 mb-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-4 border-b border-black/5 gap-3">
+        <div>
+          <h2 class="font-serif text-lg font-bold text-text-primary">Interactive Sensitivity Sandbox</h2>
+          <p class="text-xs text-text-medium">Adjust candidate suitability weights for instant in-memory re-ranking (&lt;25ms latency).</p>
+        </div>
+        <div class="flex items-center space-x-2 text-xs text-text-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="latency-indicator">Auto-Calibrated • Latency 18ms</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <div class="flex justify-between text-xs mb-1.5 font-medium">
+            <span class="text-text-primary">Notice Period Sensitivity</span>
+            <span class="text-text-medium" id="val-notice">Standard (30d)</span>
+          </div>
+          <input type="range" id="slider-notice" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+          <div class="flex justify-between text-[10px] text-text-medium mt-1">
+            <span>Flexible</span>
+            <span>Immediate Joiners Only</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs mb-1.5 font-medium">
+            <span class="text-text-primary">Product Co. Pedigree Bias</span>
+            <span class="text-text-medium" id="val-product">High Affinity</span>
+          </div>
+          <input type="range" id="slider-product" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+          <div class="flex justify-between text-[10px] text-text-medium mt-1">
+            <span>Neutral</span>
+            <span>+25% Product Co. Boost</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs mb-1.5 font-medium">
+            <span class="text-text-primary">Core Retrieval Strictness</span>
+            <span class="text-text-medium" id="val-core">0.85 Threshold</span>
+          </div>
+          <input type="range" id="slider-core" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+          <div class="flex justify-between text-[10px] text-text-medium mt-1">
+            <span>Balanced</span>
+            <span>Geometric Mean Strict</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Main Candidate Leaderboard Table -->
+    <section class="glass-card rounded-3xl p-6 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-5 border-b border-black/5 gap-4">
+        <div>
+          <h2 class="font-serif text-2xl font-bold text-text-primary">Ranked Candidate Feed</h2>
+          <p class="text-xs text-text-medium">Showing top evaluated Search &amp; Recommendation Engineers with 100% deterministic explainability.</p>
+        </div>
+
+        <!-- Inline Filters -->
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="relative">
+            <input type="text" id="search-input" placeholder="Search by name, company, skill..." class="glass-pill text-xs rounded-full pl-8 pr-4 py-2 border border-black/10 text-text-primary placeholder:text-text-medium/60 focus:outline-none focus:ring-1 focus:ring-black w-60">
+            <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-xs text-text-medium">search</span>
+          </div>
+          <button id="chip-filter-all" class="filter-chip active bg-black text-white text-xs px-3.5 py-1.5 rounded-full font-medium transition">All Ranks</button>
+          <button id="chip-filter-product" class="filter-chip glass-pill text-black text-xs px-3.5 py-1.5 rounded-full font-medium hover:bg-white transition">Product Co.</button>
+          <button id="chip-filter-notice" class="filter-chip glass-pill text-black text-xs px-3.5 py-1.5 rounded-full font-medium hover:bg-white transition">&le; 30d Notice</button>
+        </div>
+      </div>
+
+      <!-- Candidate Table Grid -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="text-[11px] uppercase tracking-wider text-text-medium border-b border-black/5">
+              <th class="py-3 px-3 w-12 font-medium">Select</th>
+              <th class="py-3 px-3 w-16 font-medium">Rank</th>
+              <th class="py-3 px-4 font-medium">Candidate &amp; Role</th>
+              <th class="py-3 px-3 font-medium">Score</th>
+              <th class="py-3 px-3 font-medium">Experience</th>
+              <th class="py-3 px-3 font-medium">Notice</th>
+              <th class="py-3 px-4 font-medium">Deterministic Recruiter Reasoning</th>
+              <th class="py-3 px-3 text-right font-medium">Action</th>
+            </tr>
+          </thead>
+          <tbody id="candidate-table-body" class="divide-y divide-black/5">
+            <!-- Dynamic rows populated by app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer Pagination / Status -->
+      <div class="mt-6 pt-4 border-t border-black/5 flex items-center justify-between text-xs text-text-medium">
+        <span id="footer-count">Showing 100 of 100 Shortlisted Candidates</span>
+        <span>Powered by Assay Hybrid DuckDB + Vector Search</span>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Bottom Floating Selection Bar (Appears when 2+ candidates selected) -->
+  <div id="compare-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 glass-card rounded-full px-6 py-3.5 flex items-center space-x-5 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <div class="flex items-center space-x-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+      <span class="text-xs font-semibold text-text-primary" id="selected-count">0 Candidates Selected</span>
+    </div>
+    <div class="h-4 w-px bg-black/10"></div>
+    <button id="btn-open-compare" class="bg-black text-white text-xs font-medium px-5 py-2 rounded-full hover:bg-black/85 transition flex items-center space-x-1.5 shadow-md">
+      <span class="material-symbols-outlined text-sm">compare_arrows</span>
+      <span>Compare Finalists Side-by-Side</span>
+    </button>
+    <button id="btn-clear-selection" class="text-xs text-text-medium hover:text-black transition">
+      Clear
+    </button>
+  </div>
+
+  <!-- Screen 2: Candidate Deep-Dive Audit & Explainability Drawer / Modal -->
+  <div id="drawer-modal" class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex justify-end opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-full max-w-2xl bg-[#FAF9F7] h-full shadow-2xl overflow-y-auto p-8 border-l border-white/60 relative translate-x-full transition-transform duration-300" id="drawer-content">
+      
+      <!-- Close Button -->
+      <button id="btn-close-drawer" class="absolute top-6 right-6 w-9 h-9 rounded-full glass-pill flex items-center justify-center text-text-medium hover:text-black transition">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+
+      <!-- Drawer Content Container -->
+      <div id="drawer-body">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: Candidate Comparative Analysis Modal -->
+  <div id="compare-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-full max-w-5xl bg-[#FAF9F7] max-h-[90vh] rounded-4xl shadow-2xl overflow-y-auto p-8 border border-white/60 relative scale-95 transition-transform duration-300" id="compare-modal-content">
+      
+      <!-- Close Button -->
+      <button id="btn-close-compare" class="absolute top-6 right-6 w-9 h-9 rounded-full glass-pill flex items-center justify-center text-text-medium hover:text-black transition">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+
+      <div class="mb-6">
+        <div class="text-xs uppercase tracking-widest text-text-medium font-medium mb-1">Assay Intelligence • Finalist Audit</div>
+        <h2 class="font-serif text-3xl font-bold text-text-primary">Candidate Comparative Analysis</h2>
+        <p class="text-xs text-text-medium mt-1">Multi-signal synchronized vector matrix evaluation across top selected engineers.</p>
+      </div>
+
+      <!-- Comparison Columns Container -->
+      <div id="compare-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Interactive Script -->
+  <script src="/app.js"></script>
+</body>
+</html>

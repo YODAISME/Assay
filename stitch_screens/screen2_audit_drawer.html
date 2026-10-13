@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Assay — Candidate Intelligence Dossier &amp; Audit Drawer</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "blob-blue": "#A2D2FF",
+            "on-secondary-fixed-variant": "#454746",
+            "primary-container": "#1b1b1b",
+            "tertiary-container": "#1b1b1b",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "surface-dim": "#dadada",
+            "inverse-on-surface": "#f1f1f1",
+            "error-container": "#ffdad6",
+            "on-primary-container": "#848484",
+            "on-background": "#1b1b1b",
+            "surface-tint": "#5e5e5e",
+            "on-secondary": "#ffffff",
+            "secondary": "#5d5f5d",
+            "tertiary": "#000000",
+            "on-tertiary-container": "#848484",
+            "error": "#ba1a1a",
+            "background": "#FAF9F7",
+            "surface-variant": "#e2e2e2",
+            "surface-container-highest": "#e2e2e2",
+            "on-surface-variant": "#4c4546",
+            "surface-bright": "#f9f9f9",
+            "secondary-fixed": "#e2e3e0",
+            "blob-coral": "#FFB4A2",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed-variant": "#474747",
+            "tertiary-fixed-dim": "#c6c6c6",
+            "primary-fixed-dim": "#c6c6c6",
+            "surface-container-low": "#f3f3f3",
+            "on-tertiary": "#ffffff",
+            "surface-container-high": "#e8e8e8",
+            "outline-variant": "#cfc4c5",
+            "inverse-surface": "#303030",
+            "on-primary-fixed": "#1b1b1b",
+            "surface-container": "#eeeeee",
+            "secondary-container": "#e2e3e0",
+            "on-surface": "#1b1b1b",
+            "on-secondary-fixed": "#1a1c1b",
+            "text-medium": "#5F5E5B",
+            "on-tertiary-fixed": "#1b1b1b",
+            "surface": "#f9f9f9",
+            "on-primary-fixed-variant": "#474747",
+            "primary-fixed": "#e2e2e2",
+            "blob-mint": "#B2F2BB",
+            "tertiary-fixed": "#e2e2e2",
+            "secondary-fixed-dim": "#c6c7c5",
+            "primary": "#000000",
+            "on-secondary-container": "#636563",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#c6c6c6",
+            "outline": "#7e7576"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-md": [
+              "Libre Caslon Text"
+            ],
+            "headline-lg": [
+              "Libre Caslon Text"
+            ],
+            "body-lg": [
+              "Hanken Grotesk"
+            ],
+            "body-md": [
+              "Hanken Grotesk"
+            ],
+            "label-sm": [
+              "Hanken Grotesk"
+            ]
+          },
+          "fontSize": {
+            "headline-md": [
+              "24px",
+              {
+                "lineHeight": "32px",
+                "fontWeight": "400"
+              }
+            ],
+            "headline-lg": [
+              "32px",
+              {
+                "lineHeight": "40px",
+                "fontWeight": "400"
+              }
+            ],
+            "body-lg": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "400"
+              }
+            ],
+            "body-md": [
+              "14px",
+              {
+                "lineHeight": "20px",
+                "fontWeight": "400"
+              }
+            ],
+            "label-sm": [
+              "12px",
+              {
+                "lineHeight": "16px",
+                "fontWeight": "500"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Liquid ambient blur effects */
+    .glass-frosted {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+    }
+    .glass-card-subtle {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    /* Hide scrollbar for drawer aesthetic */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased overflow-x-hidden min-h-screen relative selection:bg-blob-blue selection:text-primary">
+<!-- Ambient Fluid Liquid Light Blobs (Editorial atmosphere) -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+<div class="absolute -top-[15%] left-[10%] w-[600px] h-[600px] rounded-full bg-blob-coral/35 blur-[120px] mix-blend-multiply"></div>
+<div class="absolute top-[30%] -right-[10%] w-[680px] h-[680px] rounded-full bg-blob-blue/40 blur-[140px] mix-blend-multiply"></div>
+<div class="absolute bottom-[5%] left-[25%] w-[540px] h-[540px] rounded-full bg-blob-mint/35 blur-[130px] mix-blend-multiply"></div>
+</div>
+<!-- Simulated Parent Canvas: Assay Leaderboard Screen (Context behind the modal) -->
+<div class="relative z-10 w-full min-h-screen filter blur-[6px] opacity-40 pointer-events-none select-none transition-all duration-300">
+<!-- Header from Shared Components Blueprint -->
+<header class="sticky top-space-md z-50 flex items-center justify-between px-space-lg py-space-sm w-full max-w-7xl mx-auto floating rounded-full my-space-md border border-white/60 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
+<div class="flex items-center gap-space-lg">
+<span class="font-headline-md text-headline-md tracking-tight text-primary font-normal">Assay</span>
+<div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-1.5 rounded-full border border-white/60">
+<span class="material-symbols-outlined text-text-medium text-[18px]">search</span>
+<span class="font-label-sm text-label-sm text-text-medium">Search candidates, vector queries, signals...</span>
+</div>
+</div>
+<nav class="flex items-center gap-space-lg">
+<span class="text-primary font-body-md text-body-md border-b-2 border-primary pb-1">Leaderboard</span>
+<span class="text-text-medium font-body-md text-body-md">Telemetry</span>
+<span class="text-text-medium font-body-md text-body-md">Tuning</span>
+<span class="text-text-medium font-body-md text-body-md">Talent Pool</span>
+<span class="text-text-medium font-body-md text-body-md">Audit Logs</span>
+</nav>
+<div class="flex items-center gap-space-sm">
+<button class="bg-primary text-on-primary rounded-full px-space-md py-2 font-label-sm text-label-sm">Calibrate Model</button>
+</div>
+</header>
+<!-- Leaderboard Simulated Content Rows -->
+<main class="max-w-7xl mx-auto px-space-lg pt-space-lg">
+<div class="h-10 w-72 bg-surface-container-high rounded-full mb-6"></div>
+<div class="space-y-4">
+<div class="h-24 bg-surface-container-lowest/80 rounded-2xl border border-white/80 p-6 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container"></div>
+<div class="space-y-2">
+<div class="w-48 h-4 bg-surface-dim rounded"></div>
+<div class="w-32 h-3 bg-surface-container-low rounded"></div>
+</div>
+</div>
+<div class="w-32 h-6 bg-surface-dim rounded-full"></div>
+</div>
+<div class="h-24 bg-surface-container-lowest/80 rounded-2xl border border-white/80 p-6 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container"></div>
+<div class="space-y-2">
+<div class="w-40 h-4 bg-surface-dim rounded"></div>
+<div class="w-28 h-3 bg-surface-container-low rounded"></div>
+</div>
+</div>
+<div class="w-28 h-6 bg-surface-dim rounded-full"></div>
+</div>
+</div>
+</main>
+</div>
+<!-- Deep Dive Dossier Overlay & Sliding Drawer Modal Backdrop -->
+<div class="fixed inset-0 z-50 flex items-stretch justify-end bg-primary/25 backdrop-blur-[10px] transition-opacity duration-300">
+<!-- Left backdrop click dismiss trigger area -->
+<div class="flex-1 hidden xl:flex flex-col justify-between p-space-xl text-on-primary pointer-events-auto cursor-pointer" onclick="alert('Close dossier overlay')">
+<!-- Breadcrumb indicator -->
+<div class="flex items-center gap-space-sm bg-white/20 backdrop-blur-md px-space-md py-2 rounded-full w-fit text-primary border border-white/40 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span class="font-label-sm text-label-sm font-medium">Return to Search Leaderboard</span>
+<span class="mx-1 text-text-medium/60">•</span>
+<span class="font-label-sm text-label-sm text-text-medium">ESC to dismiss</span>
+</div>
+<!-- Atmospheric editorial notation on backdrop -->
+<div class="max-w-md bg-white/10 backdrop-blur-lg p-space-lg rounded-3xl border border-white/20 text-on-surface">
+<div class="flex items-center gap-2 mb-2 text-primary font-headline-md text-headline-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Deterministic Dossier</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium leading-relaxed">
+          Assay's engine calibrates live vectors against 12 non-linear facets, stripping marketing inflate from verified pedigree records.
+        </p>
+</div>
+</div>
+<!-- The Slide-in Intelligence Drawer / Inspection Panel -->
+<section class="w-full xl:w-[940px] 2xl:w-[1020px] bg-background/95 glass-frosted h-full overflow-y-auto no-scrollbar shadow-[0_24px_80px_rgba(0,0,0,0.18)] border-l border-white/90 flex flex-col relative z-20">
+<!-- Drawer Sticky Top Bar / Action Controls -->
+<div class="sticky top-0 z-40 bg-surface-container-lowest/85 backdrop-blur-xl px-space-xl py-space-md border-b border-white/80 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-space-md">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blob-mint/30 text-primary border border-blob-mint/60 font-label-sm text-label-sm font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+            Live Audit Stream
+          </span>
+<span class="text-text-medium font-body-md text-body-md hidden sm:inline">Audit Ref: <span class="font-medium text-primary">#ASY-9821-CRED</span></span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="flex items-center gap-1.5 px-space-md py-2 rounded-full bg-white/70 hover:bg-white text-primary border border-white/90 font-label-sm text-label-sm transition-all duration-150 active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+<span>Copy Recruiter Dossier</span>
+</button>
+<button class="bg-primary hover:bg-neutral-800 text-on-primary rounded-full px-space-lg py-2 font-label-sm text-label-sm flex items-center gap-2 transition-all duration-150 active:scale-95 shadow-sm">
+<span>Schedule Technical Interview</span>
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+</button>
+<button aria-label="Close" class="w-9 h-9 rounded-full bg-white/60 hover:bg-white text-text-medium hover:text-primary flex items-center justify-center border border-white/80 transition-colors ml-1 active:scale-90">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Dossier Main Content Container -->
+<div class="p-space-xl space-y-space-xl">
+<!-- 1. Top Candidate Profile Header & Hero Card -->
+<div class="bg-surface-container-lowest/90 rounded-3xl p-space-xl border border-white/90 shadow-[0_8px_30px_rgba(0,0,0,0.03)] relative overflow-hidden">
+<!-- Subtle corner pastel gradient glow -->
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-blob-blue/20 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-space-lg relative z-10">
+<!-- Left Info Block -->
+<div class="space-y-space-sm max-w-2xl">
+<!-- Badges cluster -->
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                  Rank #1 Match
+                </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blob-mint/30 text-primary border border-blob-mint/70 font-label-sm text-label-sm font-medium">
+<span class="material-symbols-outlined text-emerald-700 text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                  Composite Score: 1.000 / 1.000
+                </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-low text-text-medium border border-white/70 font-label-sm text-label-sm">
+                  Verified Product Engineer
+                </span>
+</div>
+<!-- Name and Title -->
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight font-normal">Aarav Mehta</h1>
+<p class="font-headline-md text-headline-md text-text-medium mt-1 font-normal">
+                  Recommendation Systems Lead at <span class="text-primary font-normal">CRED</span>
+</p>
+</div>
+<!-- Quick Metadata Strip -->
+<div class="flex flex-wrap items-center gap-y-2 gap-x-4 pt-2 text-text-medium font-body-md text-body-md border-t border-surface-container mt-3">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">history</span>
+<span class="text-primary font-medium">8.0y</span> YoE
+                </span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">timer</span>
+<span class="text-primary font-medium">30d</span> Notice Period (Immediate)
+                </span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">distance</span>
+                  Noida / Remote
+                </span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1.5 bg-surface-container-low/70 px-2.5 py-0.5 rounded-full border border-white">
+<span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
+                  Tier 1 Pedigree (CRED, PharmEasy, Swiggy)
+                </span>
+</div>
+</div>
+<!-- Right Visual Stat Badge -->
+<div class="flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 md:border-l border-surface-container pt-4 md:pt-0 md:pl-space-lg shrink-0">
+<div class="text-right">
+<div class="font-label-sm text-label-sm text-text-medium uppercase tracking-wider">Algorithmic Fit</div>
+<div class="font-headline-lg text-headline-lg text-primary font-normal leading-none mt-1">99.8%</div>
+<div class="font-label-sm text-label-sm text-emerald-700 mt-1 flex items-center md:justify-end gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> Top 0.02% of pool
+                </div>
+</div>
+<div class="md:mt-4">
+<span class="px-2.5 py-1 rounded-full bg-blob-blue/30 text-primary border border-blob-blue/60 font-label-sm text-label-sm inline-block">
+                  Search Model: v4.2 calibrated
+                </span>
+</div>
+</div>
+</div>
+</div>
+<!-- 6. 100% Deterministic Recruiter Reasoning Box (Prominent Editorial Quote) -->
+<div class="bg-surface-container-low/80 backdrop-blur-md rounded-3xl p-space-lg border border-white/90 relative">
+<div class="flex items-start gap-space-md">
+<span class="material-symbols-outlined text-primary text-[28px] mt-1 shrink-0" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+<div class="space-y-space-sm flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold tracking-wider uppercase text-text-medium">
+                  Deterministic Recruiter Provenance Engine
+                </span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-emerald-800 bg-blob-mint/30 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> 100% Deterministic Match
+                </span>
+</div>
+<blockquote class="font-headline-md text-headline-md text-primary font-normal leading-relaxed italic">
+                “Excellent Recommendation Systems Lead at CRED: 8.0y delivering embeddings retrieval, Noida; clear top match for this search role.”
+              </blockquote>
+<!-- Exact Citation Tags -->
+<div class="flex flex-wrap items-center gap-2 pt-2">
+<span class="font-label-sm text-label-sm text-text-medium">Evidence Citations:</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary border border-white/80 font-label-sm text-label-sm shadow-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-text-medium">code</span> CRED Repo Verification
+                </span>
+<span class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary border border-white/80 font-label-sm text-label-sm shadow-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-text-medium">description</span> 30-day notice contract check
+                </span>
+<span class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary border border-white/80 font-label-sm text-label-sm shadow-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-text-medium">stars</span> Tier-1 Product Co. baseline
+                </span>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. Multi-Signal Scoring Waterfall Card -->
+<div class="bg-surface-container-lowest/90 rounded-3xl p-space-xl border border-white/90 shadow-[0_8px_30px_rgba(0,0,0,0.03)] space-y-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-space-sm border-b border-surface-container">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary font-normal">Multi-Signal Scoring Waterfall</h2>
+<p class="font-body-md text-body-md text-text-medium">Non-linear mathematical derivation from normalized raw inputs to composite calibration.</p>
+</div>
+<div class="font-label-sm text-label-sm bg-surface-container px-3 py-1 rounded-full text-text-medium">
+              Formula: <span class="text-primary font-medium">M_comp = min(1.0, G_mean × Π(Factors))</span>
+</div>
+</div>
+<!-- Waterfall Horizontal Progression Matrix -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2">
+<!-- Step 1: Core Geometric Mean -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/60 border border-white flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-text-medium font-label-sm text-label-sm mb-1">
+<span>Step 1</span>
+<span class="material-symbols-outlined text-[16px]">scatter_plot</span>
+</div>
+<div class="font-body-md text-body-md text-text-medium">Core Geometric Mean</div>
+</div>
+<div class="mt-4">
+<div class="font-headline-md text-headline-md text-primary font-normal">0.960</div>
+<div class="font-label-sm text-label-sm text-text-medium mt-1">4 core facets affinity</div>
+</div>
+</div>
+<!-- Step 2: Skill Multiplier -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/60 border border-white flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-text-medium font-label-sm text-label-sm mb-1">
+<span>Step 2</span>
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+</div>
+<div class="font-body-md text-body-md text-text-medium">Verified Skill Multiplier</div>
+</div>
+<div class="mt-4">
+<div class="font-headline-md text-headline-md text-emerald-700 font-normal">1.15×</div>
+<div class="font-label-sm text-label-sm text-text-medium mt-1">Anti-stuffing confirmed</div>
+</div>
+</div>
+<!-- Step 3: Notice Period -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/60 border border-white flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-text-medium font-label-sm text-label-sm mb-1">
+<span>Step 3</span>
+<span class="material-symbols-outlined text-[16px]">speed</span>
+</div>
+<div class="font-body-md text-body-md text-text-medium">Notice Period Factor</div>
+</div>
+<div class="mt-4">
+<div class="font-headline-md text-headline-md text-primary font-normal">1.00×</div>
+<div class="font-label-sm text-label-sm text-text-medium mt-1">≤30 days immediate</div>
+</div>
+</div>
+<!-- Step 4: Product Co Boost -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/60 border border-white flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-text-medium font-label-sm text-label-sm mb-1">
+<span>Step 4</span>
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+</div>
+<div class="font-body-md text-body-md text-text-medium">Product Co. Boost</div>
+</div>
+<div class="mt-4">
+<div class="font-headline-md text-headline-md text-emerald-700 font-normal">1.15×</div>
+<div class="font-label-sm text-label-sm text-text-medium mt-1">100% tier-1 product co.</div>
+</div>
+</div>
+<!-- Step 5: Final Score Ceiling -->
+<div class="p-space-md rounded-2xl bg-primary text-on-primary flex flex-col justify-between shadow-md">
+<div>
+<div class="flex items-center justify-between text-on-primary-container font-label-sm text-label-sm mb-1">
+<span>Final Result</span>
+<span class="material-symbols-outlined text-[16px] text-blob-mint">check_circle</span>
+</div>
+<div class="font-body-md text-body-md text-on-primary font-medium">Calibrated Score</div>
+</div>
+<div class="mt-4">
+<div class="font-headline-md text-headline-md text-on-primary font-normal">1.000</div>
+<div class="font-label-sm text-label-sm text-on-primary-container mt-1">Normalized ceiling max</div>
+</div>
+</div>
+</div>
+<!-- Formula Step Equation Pill Line -->
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-center flex-wrap gap-2 text-text-medium font-body-md text-body-md">
+<span>Execution Chain:</span>
+<span class="font-medium text-primary">0.960</span>
+<span class="text-outline-variant">×</span>
+<span class="font-medium text-primary">1.150</span>
+<span class="text-outline-variant">×</span>
+<span class="font-medium text-primary">1.000</span>
+<span class="text-outline-variant">×</span>
+<span class="font-medium text-primary">1.150</span>
+<span class="text-outline-variant">=</span>
+<span class="font-medium text-primary">1.269</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+<span class="px-2 py-0.5 rounded-full bg-blob-mint/30 font-medium text-primary text-label-sm">Capped at 1.000 (100.0%)</span>
+</div>
+</div>
+<!-- 2. 12-Facet Competency Alignment Visual Breakdown -->
+<div class="bg-surface-container-lowest/90 rounded-3xl p-space-xl border border-white/90 shadow-[0_8px_30px_rgba(0,0,0,0.03)] space-y-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-surface-container pb-space-sm">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary font-normal">12-Facet Competency Alignment</h2>
+<p class="font-body-md text-body-md text-text-medium">Search query calibrated against verified behavioral &amp; engineering benchmarks.</p>
+</div>
+<div class="flex items-center gap-3 text-label-sm font-label-sm text-text-medium">
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> Core (4)</span>
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blob-blue"></span> Bonus (5)</span>
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-surface-dim"></span> Anti-Risk (3)</span>
+</div>
+</div>
+<!-- Section 2A: 4 Core Search Facets -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="font-body-lg text-body-lg text-primary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-emerald-600" style="font-variation-settings: 'FILL' 1;">stars</span>
+                Core Search Facets (Mandatory Requirements)
+              </h3>
+<span class="font-label-sm text-label-sm text-emerald-700 bg-blob-mint/20 px-2.5 py-0.5 rounded-full">High Affinity Group</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+<!-- Facet 1 -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/40 border border-white hover:border-blob-mint transition-all">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-body-md text-primary font-medium">Embeddings Retrieval</span>
+<span class="font-body-md text-body-md font-semibold text-emerald-700">98%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 98%"></div>
+</div>
+<p class="font-label-sm text-label-sm text-text-medium mt-2">Dense bi-encoders, FAISS, Milvus clusters</p>
+</div>
+<!-- Facet 2 -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/40 border border-white hover:border-blob-mint transition-all">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-body-md text-primary font-medium">Vector DB Search</span>
+<span class="font-body-md text-body-md font-semibold text-emerald-700">95%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 95%"></div>
+</div>
+<p class="font-label-sm text-label-sm text-text-medium mt-2">HNSW graph indices, Qdrant &amp; Pinecone</p>
+</div>
+<!-- Facet 3 -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/40 border border-white hover:border-blob-mint transition-all">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-body-md text-primary font-medium">Python ML Core</span>
+<span class="font-body-md text-body-md font-semibold text-emerald-700">94%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 94%"></div>
+</div>
+<p class="font-label-sm text-label-sm text-text-medium mt-2">PyTorch production inference, ONNX runtimes</p>
+</div>
+<!-- Facet 4 -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/40 border border-white hover:border-blob-mint transition-all">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-body-md text-primary font-medium">Ranking Evaluation</span>
+<span class="font-body-md text-body-md font-semibold text-emerald-700">96%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 96%"></div>
+</div>
+<p class="font-label-sm text-label-sm text-text-medium mt-2">NDCG@10, MRR, offline counterfactuals</p>
+</div>
+</div>
+</div>
+<!-- Section 2B: 5 Bonus Facets -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="font-body-lg text-body-lg text-primary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-text-medium">tune</span>
+                Bonus Value Multipliers (5 Signals)
+              </h3>
+<span class="font-label-sm text-label-sm text-text-medium bg-surface-container px-2.5 py-0.5 rounded-full">Additive Impact</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+<div class="p-3 rounded-2xl bg-surface-container-low/30 border border-white">
+<div class="flex justify-between text-body-md font-body-md">
+<span class="text-text-medium">LTR (Rank)</span>
+<span class="font-medium text-primary">90%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-2">
+<div class="bg-blob-blue h-full rounded-full" style="width: 90%"></div>
+</div>
+</div>
+<div class="p-3 rounded-2xl bg-surface-container-low/30 border border-white">
+<div class="flex justify-between text-body-md font-body-md">
+<span class="text-text-medium">Distributed Sys</span>
+<span class="font-medium text-primary">92%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-2">
+<div class="bg-blob-blue h-full rounded-full" style="width: 92%"></div>
+</div>
+</div>
+<div class="p-3 rounded-2xl bg-surface-container-low/30 border border-white">
+<div class="flex justify-between text-body-md font-body-md">
+<span class="text-text-medium">Marketplace Dyn</span>
+<span class="font-medium text-primary">88%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-2">
+<div class="bg-blob-blue h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<div class="p-3 rounded-2xl bg-surface-container-low/30 border border-white">
+<div class="flex justify-between text-body-md font-body-md">
+<span class="text-text-medium">LLM Finetune</span>
+<span class="font-medium text-primary">82%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-2">
+<div class="bg-blob-blue h-full rounded-full" style="width: 82%"></div>
+</div>
+</div>
+<div class="p-3 rounded-2xl bg-surface-container-low/30 border border-white col-span-2 md:col-span-1">
+<div class="flex justify-between text-body-md font-body-md">
+<span class="text-text-medium">OSS Contribs</span>
+<span class="font-medium text-primary">78%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-2">
+<div class="bg-blob-blue h-full rounded-full" style="width: 78%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2C: 3 Penalty Facets (Anti-risk checks) -->
+<div class="p-space-md rounded-2xl bg-surface-container-low/40 border border-white/80">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-emerald-700">shield_with_heart</span>
+<span class="font-body-md text-body-md text-primary font-medium">Risk &amp; Penalty Safeguards (Lower is Optimal)</span>
+</div>
+<span class="font-label-sm text-label-sm text-emerald-800 bg-blob-mint/30 px-2.5 py-0.5 rounded-full font-medium">
+                0% Aggregate Deduction Triggered
+              </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<div class="p-3 rounded-xl bg-surface-container-lowest border border-white flex items-center justify-between">
+<div>
+<div class="font-body-md text-body-md text-primary">Framework Enthusiast</div>
+<div class="font-label-sm text-label-sm text-text-medium">No shallow library switching</div>
+</div>
+<div class="px-2.5 py-1 rounded-full bg-blob-mint/20 text-emerald-800 font-label-sm text-label-sm font-semibold">0% (Safe)</div>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-lowest border border-white flex items-center justify-between">
+<div>
+<div class="font-body-md text-body-md text-primary">Domain Drift</div>
+<div class="font-label-sm text-label-sm text-text-medium">High search relevance stability</div>
+</div>
+<div class="px-2.5 py-1 rounded-full bg-blob-mint/20 text-emerald-800 font-label-sm text-label-sm font-semibold">4% (Negligible)</div>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-lowest border border-white flex items-center justify-between">
+<div>
+<div class="font-body-md text-body-md text-primary">Tenure Risk</div>
+<div class="font-label-sm text-label-sm text-text-medium">Avg tenure 2.7y per role</div>
+</div>
+<div class="px-2.5 py-1 rounded-full bg-blob-mint/20 text-emerald-800 font-label-sm text-label-sm font-semibold">0% (Safe)</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. Career History Timeline & Product Pedigree -->
+<div class="bg-surface-container-lowest/90 rounded-3xl p-space-xl border border-white/90 shadow-[0_8px_30px_rgba(0,0,0,0.03)] space-y-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-surface-container pb-space-sm">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary font-normal">Career History &amp; Verified Deployments</h2>
+<p class="font-body-md text-body-md text-text-medium">Chronological engineering timeline with production-scale verification.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-medium">
+                Total Product Experience: 8.0 Years
+              </span>
+<span class="px-3 py-1 rounded-full bg-blob-mint/20 text-emerald-800 font-label-sm text-label-sm font-medium">
+                Consulting Ratio: 0.0%
+              </span>
+</div>
+</div>
+<!-- Luxury Vertical Timeline -->
+<div class="relative pl-6 sm:pl-8 space-y-space-lg before:content-[''] before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-[2px] before:bg-surface-container-high">
+<!-- Job 1: CRED -->
+<div class="relative group">
+<!-- Timeline indicator pip -->
+<div class="absolute -left-6 sm:-left-8 top-1.5 w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center text-[10px] font-bold border-4 border-background ring-2 ring-primary/20">
+                1
+              </div>
+<div class="bg-surface-container-low/50 rounded-2xl p-space-md border border-white hover:border-surface-dim transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-headline-md text-[14px]">
+                      C
+                    </div>
+<div>
+<span class="font-body-lg text-body-lg text-primary font-medium">CRED</span>
+<span class="text-text-medium font-body-md text-body-md"> — Lead Recommendation Systems</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-white text-text-medium font-label-sm text-label-sm border border-outline-variant/40">4.2 yrs (Present)</span>
+<span class="px-2 py-0.5 rounded-full bg-blob-mint/30 text-emerald-800 font-label-sm text-label-sm">Product Co.</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-2 leading-relaxed">
+                  Architected dual-encoder vector retrieval platform handling 45M daily interactions. Deployed custom HNSW indexing cluster reducing P99 query latency from 84ms to 18ms with 99.98% SLA.
+                </p>
+<div class="flex flex-wrap gap-1.5 mt-3">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">HNSW index deployment</span>
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">Dual-encoder architecture</span>
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">Distributed PyTorch</span>
+</div>
+</div>
+</div>
+<!-- Job 2: PharmEasy -->
+<div class="relative group">
+<!-- Timeline indicator pip -->
+<div class="absolute -left-6 sm:-left-8 top-1.5 w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[10px] font-bold border-4 border-background">
+                2
+              </div>
+<div class="bg-surface-container-low/50 rounded-2xl p-space-md border border-white hover:border-surface-dim transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest text-primary flex items-center justify-center font-headline-md text-[14px]">
+                      P
+                    </div>
+<div>
+<span class="font-body-lg text-body-lg text-primary font-medium">PharmEasy</span>
+<span class="text-text-medium font-body-md text-body-md"> — Senior ML Engineer</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-white text-text-medium font-label-sm text-label-sm border border-outline-variant/40">2.6 yrs</span>
+<span class="px-2 py-0.5 rounded-full bg-blob-mint/30 text-emerald-800 font-label-sm text-label-sm">Product Co.</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-2 leading-relaxed">
+                  Owned search ranking and medical entity intent classification. Integrated Learning to Rank (LambdaMART &amp; Transformer-based re-rankers) boosting cart conversion by +14.2%.
+                </p>
+<div class="flex flex-wrap gap-1.5 mt-3">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">Search ranking</span>
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">Intent classification</span>
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">Elasticsearch Plugins</span>
+</div>
+</div>
+</div>
+<!-- Job 3: Swiggy -->
+<div class="relative group">
+<!-- Timeline indicator pip -->
+<div class="absolute -left-6 sm:-left-8 top-1.5 w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[10px] font-bold border-4 border-background">
+                3
+              </div>
+<div class="bg-surface-container-low/50 rounded-2xl p-space-md border border-white hover:border-surface-dim transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest text-primary flex items-center justify-center font-headline-md text-[14px]">
+                      S
+                    </div>
+<div>
+<span class="font-body-lg text-body-lg text-primary font-medium">Swiggy</span>
+<span class="text-text-medium font-body-md text-body-md"> — Machine Learning Engineer</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-white text-text-medium font-label-sm text-label-sm border border-outline-variant/40">1.2 yrs</span>
+<span class="px-2 py-0.5 rounded-full bg-blob-mint/30 text-emerald-800 font-label-sm text-label-sm">Product Co.</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-2 leading-relaxed">
+                  Real-time restaurant dispatch ETA algorithms and feed candidate retrieval ranking for hyperlocal food discovery services.
+                </p>
+<div class="flex flex-wrap gap-1.5 mt-3">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">Real-time ETA</span>
+<span class="px-2 py-0.5 rounded-md bg-surface-container-lowest text-text-medium font-label-sm text-label-sm border border-white">Catalog candidate scoring</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. Anti-Stuffing & Verified Assessment Audit Shield -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Left Trust Badge Glass Card -->
+<div class="md:col-span-1 bg-surface-container-lowest/90 rounded-3xl p-space-lg border border-white/90 shadow-[0_8px_30px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+<div class="space-y-3">
+<div class="w-12 h-12 rounded-2xl bg-blob-mint/40 border border-blob-mint flex items-center justify-center text-emerald-800">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary font-normal">Credential Trust Verified</h3>
+<p class="font-body-md text-body-md text-text-medium leading-relaxed">
+                No Keyword Stuffing Detected across repository PRs, portfolio commits, and internal technical references.
+              </p>
+</div>
+<div class="mt-6 pt-4 border-t border-surface-container">
+<div class="flex items-center gap-2 text-emerald-800 font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Cryptographically Timestamped</span>
+</div>
+<span class="text-text-medium font-label-sm text-label-sm block mt-1">SHA256: 8f4c...3e1a</span>
+</div>
+</div>
+<!-- Right Platform Assessment Benchmarks -->
+<div class="md:col-span-2 bg-surface-container-lowest/90 rounded-3xl p-space-lg border border-white/90 shadow-[0_8px_30px_rgba(0,0,0,0.03)] space-y-space-md">
+<div class="flex items-center justify-between pb-2 border-b border-surface-container">
+<div>
+<h3 class="font-headline-md text-headline-md text-primary font-normal">Platform Benchmark Assessments</h3>
+<p class="font-label-sm text-label-sm text-text-medium">Blind standardized technical evaluations &amp; percentiles</p>
+</div>
+<span class="material-symbols-outlined text-text-medium text-[20px]">equalizer</span>
+</div>
+<div class="space-y-4">
+<!-- Assessment 1 -->
+<div>
+<div class="flex justify-between items-center text-body-md font-body-md mb-1.5">
+<span class="text-primary font-medium">Information Retrieval Architecture</span>
+<div class="flex items-center gap-2">
+<span class="font-semibold text-primary">95/100</span>
+<span class="text-emerald-700 bg-blob-mint/30 px-2 py-0.5 rounded-full font-label-sm text-label-sm">99th percentile</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 95%"></div>
+</div>
+</div>
+<!-- Assessment 2 -->
+<div>
+<div class="flex justify-between items-center text-body-md font-body-md mb-1.5">
+<span class="text-primary font-medium">Vector DBs &amp; Approximate Nearest Neighbor</span>
+<div class="flex items-center gap-2">
+<span class="font-semibold text-primary">92/100</span>
+<span class="text-emerald-700 bg-blob-mint/30 px-2 py-0.5 rounded-full font-label-sm text-label-sm">97th percentile</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 92%"></div>
+</div>
+</div>
+<!-- Assessment 3 -->
+<div>
+<div class="flex justify-between items-center text-body-md font-body-md mb-1.5">
+<span class="text-primary font-medium">PyTorch &amp; Production ML Systems</span>
+<div class="flex items-center gap-2">
+<span class="font-semibold text-primary">88/100</span>
+<span class="text-emerald-700 bg-blob-mint/30 px-2 py-0.5 rounded-full font-label-sm text-label-sm">94th percentile</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Editorial Drawer Footer Actions & Disclaimer -->
+<div class="pt-space-md border-t border-white/60 flex flex-col sm:flex-row items-center justify-between gap-space-md pb-space-lg text-text-medium font-label-sm text-label-sm">
+<div>
+<span>© 2025 Assay Intelligence Inc. • Liquid Light Editorial Talent Engine</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="hover:text-primary cursor-pointer transition-colors">Fairness &amp; Bias Audit</span>
+<span class="hover:text-primary cursor-pointer transition-colors">API Telemetry</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Privacy Directive</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</body></html>

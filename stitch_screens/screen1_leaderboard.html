@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Assay — AI Candidate Ranking &amp; Talent Intelligence</title>
+<!-- Google Fonts: Libre Caslon Text & Hanken Grotesk -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&amp;family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "blob-mint": "#B2F2BB",
+          "on-secondary": "#ffffff",
+          "text-medium": "#5F5E5B",
+          "tertiary": "#000000",
+          "inverse-primary": "#c6c6c6",
+          "blob-blue": "#A2D2FF",
+          "secondary-fixed": "#e2e3e0",
+          "error-container": "#ffdad6",
+          "on-surface-variant": "#4c4546",
+          "surface": "#f9f9f9",
+          "primary-fixed-dim": "#c6c6c6",
+          "on-secondary-fixed": "#1a1c1b",
+          "on-primary-fixed-variant": "#474747",
+          "outline-variant": "#cfc4c5",
+          "surface-dim": "#dadada",
+          "inverse-surface": "#303030",
+          "surface-tint": "#5e5e5e",
+          "surface-container-lowest": "#ffffff",
+          "surface-container-highest": "#e2e2e2",
+          "on-error": "#ffffff",
+          "tertiary-fixed": "#e2e2e2",
+          "tertiary-fixed-dim": "#c6c6c6",
+          "primary": "#000000",
+          "secondary-fixed-dim": "#c6c7c5",
+          "on-background": "#1b1b1b",
+          "on-error-container": "#93000a",
+          "surface-container": "#eeeeee",
+          "surface-container-low": "#f3f3f3",
+          "on-secondary-container": "#636563",
+          "error": "#ba1a1a",
+          "secondary-container": "#e2e3e0",
+          "on-surface": "#1b1b1b",
+          "primary-container": "#1b1b1b",
+          "surface-variant": "#e2e2e2",
+          "outline": "#7e7576",
+          "background": "#FAF9F7",
+          "surface-bright": "#f9f9f9",
+          "on-tertiary-fixed": "#1b1b1b",
+          "on-tertiary-container": "#848484",
+          "primary-fixed": "#e2e2e2",
+          "on-primary-container": "#848484",
+          "tertiary-container": "#1b1b1b",
+          "on-primary-fixed": "#1b1b1b",
+          "blob-coral": "#FFB4A2",
+          "secondary": "#5d5f5d",
+          "on-tertiary": "#ffffff",
+          "surface-container-high": "#e8e8e8",
+          "on-secondary-fixed-variant": "#454746",
+          "inverse-on-surface": "#f1f1f1",
+          "on-primary": "#ffffff",
+          "on-tertiary-fixed-variant": "#474747"
+        },
+        "borderRadius": {
+          "DEFAULT": "1rem",
+          "lg": "2rem",
+          "xl": "3rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "gutter": "1.5rem",
+          "margin": "2rem",
+          "space-xs": "0.25rem",
+          "space-xl": "2.5rem",
+          "space-md": "1rem",
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem"
+        },
+        "fontFamily": {
+          "headline-md": [
+            "Libre Caslon Text"
+          ],
+          "headline-lg": [
+            "Libre Caslon Text"
+          ],
+          "body-md": [
+            "Hanken Grotesk"
+          ],
+          "label-sm": [
+            "Hanken Grotesk"
+          ],
+          "body-lg": [
+            "Hanken Grotesk"
+          ]
+        },
+        "fontSize": {
+          "headline-md": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "fontWeight": "400"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "500"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Liquid Blooms */
+    .bloom-coral {
+      background: radial-gradient(circle, rgba(255, 180, 162, 0.45) 0%, rgba(255, 180, 162, 0) 70%);
+    }
+    .bloom-blue {
+      background: radial-gradient(circle, rgba(162, 210, 255, 0.45) 0%, rgba(162, 210, 255, 0) 70%);
+    }
+    .bloom-mint {
+      background: radial-gradient(circle, rgba(178, 242, 187, 0.40) 0%, rgba(178, 242, 187, 0) 70%);
+    }
+
+    /* Custom ultra-smooth slider */
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      height: 14px;
+      width: 14px;
+      border-radius: 9999px;
+      background: #000000;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border: 2px solid #ffffff;
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 14px;
+      width: 14px;
+      border-radius: 9999px;
+      background: #000000;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border: 2px solid #ffffff;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased relative min-h-screen selection:bg-blob-blue/40 selection:text-primary overflow-x-hidden">
+<!-- Soft Ambient Liquid Blobs in Background -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+<div class="absolute -top-32 -left-20 w-[650px] h-[650px] bloom-coral rounded-full blur-3xl opacity-75"></div>
+<div class="absolute top-1/4 -right-32 w-[720px] h-[720px] bloom-blue rounded-full blur-3xl opacity-70"></div>
+<div class="absolute top-2/3 left-1/3 w-[600px] h-[600px] bloom-mint rounded-full blur-3xl opacity-60"></div>
+<div class="absolute -bottom-40 right-10 w-[550px] h-[550px] bloom-coral rounded-full blur-3xl opacity-50"></div>
+</div>
+<div class="relative z-10 flex flex-col min-h-screen">
+<!-- 1. Floating Glass Pill Header (Shared Component: TopNavBar with matching active state 'Leaderboard') -->
+<header class="sticky top-space-md z-50 flex items-center justify-between px-space-lg py-space-sm w-full max-w-7xl mx-auto floating rounded-full my-space-md border border-white/60 dark:border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+<!-- Brand & Search cluster -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md tracking-tight text-primary font-normal">Assay</span>
+<span class="hidden lg:inline-block font-label-sm text-label-sm text-text-medium px-space-sm py-0.5 rounded-full bg-white/70 border border-white/80">Talent Intelligence</span>
+</div>
+<!-- Search Bar on left as defined in JSON -->
+<div class="relative items-center hidden md:flex">
+<span class="material-symbols-outlined absolute left-3 text-text-medium text-[18px]">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-white/60 hover:bg-white/80 focus:bg-white rounded-full font-body-md text-body-md text-on-surface placeholder:text-text-medium border border-white/70 focus:outline-none focus:ring-1 focus:ring-primary w-64 transition-all duration-200" placeholder="Search benchmark, skills, companies..." type="text"/>
+</div>
+</div>
+<!-- JSON Navigation links (Autonomous active determination: 'Leaderboard' is active) -->
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-primary font-body-md text-body-md border-b-2 border-primary pb-1" href="#leaderboard">Leaderboard</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#telemetry">Telemetry</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#tuning">Tuning</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#talent">Talent Pool</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#audit">Audit Logs</a>
+</nav>
+<!-- Trailing actions cluster -->
+<div class="flex items-center gap-space-sm">
+<!-- Benchmark Live Chip Indicator -->
+<div class="hidden xl:flex items-center gap-2 px-3 py-1 bg-white/70 border border-white/80 rounded-full">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-text-medium">100K Pool Active</span>
+</div>
+<button class="hidden sm:inline-flex items-center px-4 py-2 rounded-full font-body-md text-body-md bg-white/60 hover:bg-white/90 text-primary border border-white/80 transition-all duration-150 active:scale-[0.98]" type="button">
+          Export Intel
+        </button>
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-body-md text-body-md bg-primary hover:bg-neutral-800 text-on-primary transition-all duration-150 active:scale-[0.98] shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Calibrate Model</span>
+</button>
+<!-- Trailing Icon Actions -->
+<div class="hidden md:flex items-center gap-1 ml-1 text-text-medium">
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors" title="Notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors" title="Help">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<!-- Profile Avatar -->
+<div class="pl-1">
+<img alt="Chief Talent Architect Profile" class="w-8 h-8 rounded-full border border-white/90 shadow-sm object-cover" data-alt="Portrait of the Chief Talent Architect, a professional executive wearing minimalist contemporary charcoal attire in a bright, modern architectural studio filled with soft daylight, evoking editorial sophistication and quiet authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmv5mk5jdBUc5rVEUse08DCNm1nElpuvqymuFETvax_gAs_2h5SCqSq_gHXH_cc2WtWn1ETBEi391yNdpYNy97UPdPiO7PwT6BD0ZZQSjFBRasSVB8h-XKbF-jsTyPAHJLQSRVLnfIdG0M6GCoN5qnhzyjmF3DzN0Dx2QOE_FDjh6oFR2TjQFxqKLezUzm9BrXZ1lKZjPDLhTbRLPg1Yr4jZxS9uOMcBcreHKvNYAoeOEWPosulqZ88M5b2SAzHwlVA5J2v_N40Q"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-space-md md:px-space-lg space-y-space-lg pb-space-xl">
+<!-- Section Title & Context -->
+<section class="pt-space-md flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-blob-blue/30 text-primary border border-blob-blue/50">Production Calibration Run #842</span>
+<span class="text-text-medium font-label-sm text-label-sm">• Updated 2m ago</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Staff / Principal Search &amp; Ranking Engineer</h1>
+<p class="font-body-md text-body-md text-text-medium mt-1">Calibrated against high-scale distributed vector retrieval &amp; high-affinity tier-1 consumer architectures.</p>
+</div>
+<div class="flex items-center gap-2">
+<div class="px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.02)] flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-blob-mint border border-primary/20"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Auto-Calibrated • Latency 42ms</span>
+</div>
+</div>
+</section>
+<!-- 2. Telemetry Bar (Frosted Glass Card, rounded-3xl) -->
+<section class="bg-gradient-to-b from-white/75 to-white/35 backdrop-blur-2xl rounded-3xl border border-white/65 shadow-[0_12px_36px_rgba(0,0,0,0.04)] p-space-lg" id="telemetry">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 relative divide-y md:divide-y-0 md:divide-x divide-white/70">
+<!-- Metric 1 -->
+<div class="pt-2 md:pt-0 md:px-4 first:pl-0">
+<span class="font-label-sm text-label-sm text-text-medium uppercase tracking-wider block mb-1">Raw Pipeline Inflow</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary font-normal tracking-tight">100,000</span>
+<span class="font-label-sm text-label-sm text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Indexed</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-1">Initial indexed ingestion pool</p>
+</div>
+<!-- Metric 2 -->
+<div class="pt-4 md:pt-0 md:px-4">
+<span class="font-label-sm text-label-sm text-text-medium uppercase tracking-wider block mb-1">Verified Experience</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary font-normal tracking-tight">24,812</span>
+<span class="font-label-sm text-label-sm text-text-medium bg-white/80 px-2 py-0.5 rounded-full">24.8% pass</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-1">Hard filters &amp; verified experience</p>
+</div>
+<!-- Metric 3 -->
+<div class="pt-4 md:pt-0 md:px-4">
+<span class="font-label-sm text-label-sm text-text-medium uppercase tracking-wider block mb-1">Calibrated Cohort</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary font-normal tracking-tight">Top 100</span>
+<span class="font-label-sm text-label-sm text-primary bg-blob-mint/60 border border-blob-mint px-2 py-0.5 rounded-full font-medium">99.9th %ile</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-1">Deterministic LLM calibrated pool</p>
+</div>
+<!-- Metric 4 -->
+<div class="pt-4 md:pt-0 md:px-4">
+<span class="font-label-sm text-label-sm text-text-medium uppercase tracking-wider block mb-1">Integrity Index</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary font-normal tracking-tight">0.0%</span>
+<span class="font-label-sm text-label-sm text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Zero Noise</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-1">Anomaly &amp; duplicate suppression</p>
+</div>
+</div>
+</section>
+<!-- 3. Quick Tuning Strip -->
+<section class="bg-gradient-to-b from-white/70 to-white/30 backdrop-blur-2xl rounded-3xl border border-white/65 shadow-[0_12px_36px_rgba(0,0,0,0.04)] px-space-lg py-space-md" id="tuning">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+<span class="font-headline-md text-headline-md text-primary tracking-tight">Model Tuning</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-grow max-w-4xl">
+<!-- Control 1: Notice Sensitivity -->
+<div class="space-y-1.5 bg-white/40 p-2.5 rounded-2xl border border-white/60">
+<div class="flex justify-between items-center text-label-sm font-label-sm">
+<span class="text-text-medium">Notice Sensitivity</span>
+<span class="px-2 py-0.5 rounded-full bg-white/80 text-primary border border-white font-medium">30 Days Max</span>
+</div>
+<input class="w-full accent-primary h-1.5 bg-surface-container rounded-lg cursor-pointer" max="90" min="1" type="range" value="30"/>
+</div>
+<!-- Control 2: Product Co. Bias -->
+<div class="space-y-1.5 bg-white/40 p-2.5 rounded-2xl border border-white/60">
+<div class="flex justify-between items-center text-label-sm font-label-sm">
+<span class="text-text-medium">Product Co. Bias</span>
+<span class="px-2 py-0.5 rounded-full bg-white/80 text-primary border border-white font-medium">High Affinity</span>
+</div>
+<input class="w-full accent-primary h-1.5 bg-surface-container rounded-lg cursor-pointer" max="100" min="0" type="range" value="80"/>
+</div>
+<!-- Control 3: Core Retrieval Strictness -->
+<div class="space-y-1.5 bg-white/40 p-2.5 rounded-2xl border border-white/60">
+<div class="flex justify-between items-center text-label-sm font-label-sm">
+<span class="text-text-medium">Retrieval Strictness</span>
+<span class="px-2 py-0.5 rounded-full bg-white/80 text-primary border border-white font-medium">0.85 Threshold</span>
+</div>
+<input class="w-full accent-primary h-1.5 bg-surface-container rounded-lg cursor-pointer" max="100" min="50" type="range" value="85"/>
+</div>
+</div>
+<!-- Quick Action -->
+<button class="self-center px-4 py-2 rounded-full font-body-md text-body-md bg-white hover:bg-white/90 text-primary border border-white/90 shadow-sm transition-all duration-150 active:scale-[0.98]" type="button">
+            Reset to Default
+          </button>
+</div>
+</section>
+<!-- 4. Main Candidate Leaderboard (High-End Editorial Glass Table Card) -->
+<section class="bg-gradient-to-b from-white/85 to-white/45 backdrop-blur-2xl rounded-3xl border border-white/65 shadow-[0_16px_40px_rgba(0,0,0,0.05)] overflow-hidden" id="leaderboard">
+<!-- Leaderboard Header Controls -->
+<div class="p-space-lg border-b border-white/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary tracking-tight">Ranked Candidate Feed</h2>
+<p class="font-body-md text-body-md text-text-medium">Ordered by deterministic multi-factor vector score &amp; experience calibration.</p>
+</div>
+<!-- Filter Chips & Sort -->
+<div class="flex flex-wrap items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-primary text-on-primary">All Ranks (100)</button>
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-white/70 hover:bg-white text-text-medium hover:text-primary border border-white transition-colors">Product Tier 1</button>
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-white/70 hover:bg-white text-text-medium hover:text-primary border border-white transition-colors">Immediate Joiner</button>
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-white/70 hover:bg-white text-text-medium hover:text-primary border border-white transition-colors">High Relevance (&gt;0.90)</button>
+<div class="h-4 w-px bg-outline-variant/40 mx-1"></div>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-white/70 border border-white text-primary">
+<span class="material-symbols-outlined text-[16px]">sort</span>
+<span>Score (Desc)</span>
+</button>
+</div>
+</div>
+<!-- Candidate Rows (Bento/Card Rows with Rich Editorial Layout) -->
+<div class="divide-y divide-white/60">
+<!-- Candidate 1 -->
+<div class="p-space-lg hover:bg-white/40 transition-colors duration-200">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Left Rank + Bio -->
+<div class="flex items-start gap-4">
+<div class="flex flex-col items-center">
+<div class="w-11 h-11 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-headline-md text-headline-md font-semibold shadow-sm">
+                    01
+                  </div>
+<span class="mt-1 px-1.5 py-0.2 rounded-full font-label-sm text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200">+2 delta</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-primary">Aarav Mehta</h3>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/80 border border-white/90 text-primary">Product Co.</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-blob-mint/50 border border-blob-mint text-primary">Tier 1 Pedigree</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-0.5">Recommendation Systems Lead at CRED</p>
+<div class="flex flex-wrap items-center gap-2 mt-2">
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">8.0y YoE</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">30d Notice</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Noida / Remote</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Vector Indexing (HNSW)</span>
+</div>
+</div>
+</div>
+<!-- Right Score & Action -->
+<div class="flex items-center justify-between lg:justify-end gap-6 border-t lg:border-t-0 pt-3 lg:pt-0 border-white/60">
+<div class="text-right">
+<span class="block font-label-sm text-label-sm text-text-medium uppercase">Composite Score</span>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blob-mint/50 border border-blob-mint text-primary font-headline-md text-headline-md font-semibold">
+<span>1.000</span>
+<span class="material-symbols-outlined text-[16px] text-emerald-800" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-white text-text-medium hover:text-primary transition-colors border border-transparent hover:border-white/80" title="Shortlist">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+<button class="px-4 py-2 rounded-full font-body-md text-body-md bg-white hover:bg-neutral-900 hover:text-white text-primary border border-white/90 shadow-sm transition-all duration-150 active:scale-[0.98]">
+                    Audit Profile
+                  </button>
+</div>
+</div>
+</div>
+<!-- Recruiter Reasoning Quote -->
+<div class="mt-3.5 pl-4 border-l-2 border-primary/20 bg-white/30 rounded-r-2xl py-2 px-3">
+<p class="font-body-md text-body-md text-primary/90 italic">
+                “Excellent Recommendation Systems at CRED: 8.0y delivering embeddings retrieval, Noida; clear top match.”
+              </p>
+</div>
+</div>
+<!-- Candidate 2 -->
+<div class="p-space-lg hover:bg-white/40 transition-colors duration-200">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="flex flex-col items-center">
+<div class="w-11 h-11 rounded-2xl bg-white/90 border border-white text-primary flex items-center justify-center font-headline-md text-headline-md font-semibold shadow-sm">
+                    02
+                  </div>
+<span class="mt-1 px-1.5 py-0.2 rounded-full font-label-sm text-[10px] bg-neutral-100 text-text-medium border border-neutral-200">= delta</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-primary">Priya Sundaram</h3>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/80 border border-white/90 text-primary">Product Co.</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-blob-blue/40 border border-blob-blue text-primary">GenAI Research</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-0.5">Senior Search &amp; Ranking Engineer at Sarvam AI</p>
+<div class="flex flex-wrap items-center gap-2 mt-2">
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">6.5y YoE</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">15d Notice</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Bengaluru</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Low-Latency Triton</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between lg:justify-end gap-6 border-t lg:border-t-0 pt-3 lg:pt-0 border-white/60">
+<div class="text-right">
+<span class="block font-label-sm text-label-sm text-text-medium uppercase">Composite Score</span>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-white text-primary font-headline-md text-headline-md font-semibold">
+<span>0.942</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-white text-text-medium hover:text-primary transition-colors border border-transparent hover:border-white/80" title="Shortlist">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+<button class="px-4 py-2 rounded-full font-body-md text-body-md bg-white hover:bg-neutral-900 hover:text-white text-primary border border-white/90 shadow-sm transition-all duration-150 active:scale-[0.98]">
+                    Audit Profile
+                  </button>
+</div>
+</div>
+</div>
+<div class="mt-3.5 pl-4 border-l-2 border-blob-blue bg-white/30 rounded-r-2xl py-2 px-3">
+<p class="font-body-md text-body-md text-primary/90 italic">
+                “Deep transformer retrieval architectures, low latency vector search deployment in production.”
+              </p>
+</div>
+</div>
+<!-- Candidate 3 -->
+<div class="p-space-lg hover:bg-white/40 transition-colors duration-200">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="flex flex-col items-center">
+<div class="w-11 h-11 rounded-2xl bg-white/90 border border-white text-primary flex items-center justify-center font-headline-md text-headline-md font-semibold shadow-sm">
+                    03
+                  </div>
+<span class="mt-1 px-1.5 py-0.2 rounded-full font-label-sm text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200">+3 delta</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-primary">Devendra Rao</h3>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/80 border border-white/90 text-primary">Product Co.</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium">Immediate</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-0.5">Principal ML Systems Engineer at Swiggy</p>
+<div class="flex flex-wrap items-center gap-2 mt-2">
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">9.2y YoE</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-emerald-100 text-emerald-900">Immediate</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Hyderabad</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Real-time Intent</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between lg:justify-end gap-6 border-t lg:border-t-0 pt-3 lg:pt-0 border-white/60">
+<div class="text-right">
+<span class="block font-label-sm text-label-sm text-text-medium uppercase">Composite Score</span>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-white text-primary font-headline-md text-headline-md font-semibold">
+<span>0.915</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-white text-text-medium hover:text-primary transition-colors border border-transparent hover:border-white/80" title="Shortlist">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+<button class="px-4 py-2 rounded-full font-body-md text-body-md bg-white hover:bg-neutral-900 hover:text-white text-primary border border-white/90 shadow-sm transition-all duration-150 active:scale-[0.98]">
+                    Audit Profile
+                  </button>
+</div>
+</div>
+</div>
+<div class="mt-3.5 pl-4 border-l-2 border-blob-mint bg-white/30 rounded-r-2xl py-2 px-3">
+<p class="font-body-md text-body-md text-primary/90 italic">
+                “Proven scale handling 200M+ real-time intent queries; benchmark match exceeds 95% semantic coherence.”
+              </p>
+</div>
+</div>
+<!-- Candidate 4 -->
+<div class="p-space-lg hover:bg-white/40 transition-colors duration-200">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="flex flex-col items-center">
+<div class="w-11 h-11 rounded-2xl bg-white/90 border border-white text-primary flex items-center justify-center font-headline-md text-headline-md font-semibold shadow-sm">
+                    04
+                  </div>
+<span class="mt-1 px-1.5 py-0.2 rounded-full font-label-sm text-[10px] bg-amber-100 text-amber-800 border border-amber-200">-1 delta</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-primary">Ananya Joshi</h3>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/80 border border-white/90 text-primary">Product Co.</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-blob-coral/40 border border-blob-coral text-primary">Staff Scientist</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-0.5">Staff NLP &amp; Retrieval Scientist at Razorpay</p>
+<div class="flex flex-wrap items-center gap-2 mt-2">
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">7.0y YoE</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">45d Notice</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Bengaluru</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Multi-Modal Graphs</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between lg:justify-end gap-6 border-t lg:border-t-0 pt-3 lg:pt-0 border-white/60">
+<div class="text-right">
+<span class="block font-label-sm text-label-sm text-text-medium uppercase">Composite Score</span>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-white text-primary font-headline-md text-headline-md font-semibold">
+<span>0.887</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-white text-text-medium hover:text-primary transition-colors border border-transparent hover:border-white/80" title="Shortlist">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+<button class="px-4 py-2 rounded-full font-body-md text-body-md bg-white hover:bg-neutral-900 hover:text-white text-primary border border-white/90 shadow-sm transition-all duration-150 active:scale-[0.98]">
+                    Audit Profile
+                  </button>
+</div>
+</div>
+</div>
+<div class="mt-3.5 pl-4 border-l-2 border-blob-coral bg-white/30 rounded-r-2xl py-2 px-3">
+<p class="font-body-md text-body-md text-primary/90 italic">
+                “Exceptional publication track record and high semantic ranking score across multi-modal payment graphs.”
+              </p>
+</div>
+</div>
+<!-- Candidate 5 -->
+<div class="p-space-lg hover:bg-white/40 transition-colors duration-200">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="flex flex-col items-center">
+<div class="w-11 h-11 rounded-2xl bg-white/90 border border-white text-primary flex items-center justify-center font-headline-md text-headline-md font-semibold shadow-sm">
+                    05
+                  </div>
+<span class="mt-1 px-1.5 py-0.2 rounded-full font-label-sm text-[10px] bg-neutral-100 text-text-medium border border-neutral-200">= delta</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-primary">Kabir Varma</h3>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/80 border border-white/90 text-primary">Product Co.</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/80 border border-white/90 text-primary">High-Speed Retrieval</span>
+</div>
+<p class="font-body-md text-body-md text-text-medium mt-0.5">AI Infrastructure Lead at Zepto</p>
+<div class="flex flex-wrap items-center gap-2 mt-2">
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">5.8y YoE</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">30d Notice</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Mumbai</span>
+<span class="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-white/60 border border-white/70 text-text-medium">Sub-10ms Inference</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between lg:justify-end gap-6 border-t lg:border-t-0 pt-3 lg:pt-0 border-white/60">
+<div class="text-right">
+<span class="block font-label-sm text-label-sm text-text-medium uppercase">Composite Score</span>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-white text-primary font-headline-md text-headline-md font-semibold">
+<span>0.864</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-white text-text-medium hover:text-primary transition-colors border border-transparent hover:border-white/80" title="Shortlist">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+<button class="px-4 py-2 rounded-full font-body-md text-body-md bg-white hover:bg-neutral-900 hover:text-white text-primary border border-white/90 shadow-sm transition-all duration-150 active:scale-[0.98]">
+                    Audit Profile
+                  </button>
+</div>
+</div>
+</div>
+<div class="mt-3.5 pl-4 border-l-2 border-primary/20 bg-white/30 rounded-r-2xl py-2 px-3">
+<p class="font-body-md text-body-md text-primary/90 italic">
+                “Strong latency optimization in real-time candidate graph retrieval, robust distributed systems background.”
+              </p>
+</div>
+</div>
+</div>
+<!-- Pagination & Expansion Footer within Card -->
+<div class="p-space-lg bg-white/40 border-t border-white/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+<span class="font-body-md text-body-md text-text-medium">Showing 1–5 of 100 Candidates</span>
+<div class="flex items-center gap-3">
+<button class="px-5 py-2.5 rounded-full font-body-md text-body-md bg-white hover:bg-neutral-100 text-primary border border-white/90 shadow-sm transition-all duration-150 active:scale-[0.98]">
+              Load Remaining 95
+            </button>
+<div class="flex items-center gap-1">
+<button class="w-9 h-9 rounded-full bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center">1</button>
+<button class="w-9 h-9 rounded-full bg-white/60 hover:bg-white text-text-medium font-label-sm text-label-sm flex items-center justify-center transition-colors">2</button>
+<button class="w-9 h-9 rounded-full bg-white/60 hover:bg-white text-text-medium font-label-sm text-label-sm flex items-center justify-center transition-colors">3</button>
+<span class="text-text-medium px-1">...</span>
+<button class="w-9 h-9 rounded-full bg-white/60 hover:bg-white text-text-medium font-label-sm text-label-sm flex items-center justify-center transition-colors">20</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Model Intelligence Context Bento -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+<div class="bg-gradient-to-b from-white/70 to-white/30 backdrop-blur-2xl rounded-3xl border border-white/65 p-space-lg">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">psychology</span>
+<h4 class="font-headline-md text-headline-md text-primary">Explainable Scoring</h4>
+</div>
+<p class="font-body-md text-body-md text-text-medium">Every candidate score is grounded in verifiable repository commits, published papers, and verified career trajectory milestones.</p>
+</div>
+<div class="bg-gradient-to-b from-white/70 to-white/30 backdrop-blur-2xl rounded-3xl border border-white/65 p-space-lg">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">balance</span>
+<h4 class="font-headline-md text-headline-md text-primary">Zero Demographic Bias</h4>
+</div>
+<p class="font-body-md text-body-md text-text-medium">Model audits continuously verify zero correlation between scoring matrices and non-meritocratic candidate attributes.</p>
+</div>
+<div class="bg-gradient-to-b from-white/70 to-white/30 backdrop-blur-2xl rounded-3xl border border-white/65 p-space-lg">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">bolt</span>
+<h4 class="font-headline-md text-headline-md text-primary">Dynamic Ingestion</h4>
+</div>
+<p class="font-body-md text-body-md text-text-medium">Telemetry syncs in real time with company ATS channels, updating notice period availability and active pipeline movement.</p>
+</div>
+</section>
+</main>
+<!-- 5. Footer (Shared Component: Footer) -->
+<footer class="docked full-width bottom-0 border-t border-white/40 bg-surface-container-low/60 backdrop-blur-md">
+<div class="w-full py-space-lg px-space-xl flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-space-md">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md text-primary">Assay</span>
+<span class="font-body-md text-body-md text-text-medium">© 2025 Assay Intelligence Inc. All rights reserved. Liquid Light Editorial Talent Engine.</span>
+</div>
+<div class="flex flex-wrap items-center gap-6">
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#explainability">Model Explainability</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#fairness">Fairness &amp; Bias Audit</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#telemetry-api">API Telemetry</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#privacy">Privacy Directive</a>
+<a class="text-text-medium font-body-md text-body-md hover:text-primary transition-colors" href="#status">System Status</a>
+</div>
+</div>
+</footer>
+</div>
+</body></html>
