@@ -438,95 +438,76 @@
 
 
     <!-- ================================================================= -->
-    <!-- VIEW 2: STITCH SCREEN 1 — RECRUITER COCKPIT & LEADERBOARD         -->
+    <!-- VIEW 2: INITIAL RECRUITER COCKPIT & LEADERBOARD                   -->
     <!-- ================================================================= -->
     <div id="view-recruiter" class="hidden transition-all duration-300">
 
-      <!-- Floating Header (Stitch Screen 1) -->
-      <header class="sticky top-4 z-40 flex items-center justify-between px-6 py-3 w-full rounded-full border border-white/60 bg-surface-container-lowest/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.04)] mb-8">
-        <div class="flex items-center gap-4">
-          <a class="flex items-center gap-2" href="#">
-            <span class="font-headline-md text-2xl tracking-tight text-primary font-normal">Assay</span>
-            <span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-primary/20"></span>
-            <span class="hidden sm:inline-block font-label-sm text-xs text-text-medium uppercase tracking-wider">Recruiter Cockpit</span>
-          </a>
-          <div class="hidden md:flex items-center gap-2 pl-4 border-l border-black/10">
+      <!-- 1. Floating Suspended Header -->
+      <header class="glass-pill rounded-full px-6 py-3.5 mb-8 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-4">
+          <div class="w-9 h-9 bg-black rounded-full flex items-center justify-center text-white font-serif font-bold text-lg shadow-sm">
+            A
+          </div>
+          <div>
+            <span class="font-serif text-xl tracking-tight font-bold text-text-primary">Assay</span>
+            <span class="text-xs uppercase tracking-widest text-text-medium ml-2 font-medium">Talent Intelligence</span>
+          </div>
+          <div class="hidden md:flex items-center space-x-2 pl-4 border-l border-black/10">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-xs text-text-medium">Logged in: <strong class="text-black" id="recruiter-name-badge">Eleanor Vane</strong></span>
+            <span class="text-xs text-text-medium font-medium">Search &amp; ML Benchmark &bull; 100K Pool</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button id="btn-export-csv" class="glass-pill text-xs font-semibold px-4 py-2 rounded-full text-black hover:bg-white transition flex items-center gap-1.5 shadow-xs">
+        <div class="flex items-center space-x-3">
+          <button id="btn-export-csv" class="glass-pill text-xs font-semibold px-4 py-2 rounded-full text-black hover:bg-white transition flex items-center space-x-1.5 shadow-sm">
             <span class="material-symbols-outlined text-sm">download</span>
             <span>Export CSV</span>
           </button>
-          <button id="btn-run-pipeline" class="bg-black text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-black/85 transition flex items-center gap-1.5 shadow-md">
+          <button id="btn-run-pipeline" class="bg-black text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-black/85 transition flex items-center space-x-1.5 shadow-md">
             <span class="material-symbols-outlined text-sm">play_arrow</span>
             <span>Run Pipeline</span>
           </button>
-          <button class="btn-logout glass-pill text-xs font-semibold px-4 py-2 rounded-full text-red-600 hover:bg-white transition flex items-center gap-1">
+          <button class="btn-logout glass-pill text-xs font-semibold px-4 py-2 rounded-full text-red-600 hover:bg-white transition flex items-center space-x-1">
             <span class="material-symbols-outlined text-sm">logout</span>
             <span>Log Out</span>
           </button>
         </div>
       </header>
 
-      <!-- Telemetry HUD (Stitch Screen 1) -->
-      <section class="glass-specular rounded-3xl p-6 mb-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+      <!-- 2. Telemetry HUD Bar -->
+      <section class="glass-card rounded-3xl p-6 mb-8 grid grid-cols-2 md:grid-cols-4 gap-6">
         <div class="border-r border-black/5 last:border-0 pr-4">
           <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Total Pool</div>
-          <div class="font-headline text-3xl font-bold text-text-primary" id="tele-total">100,000</div>
+          <div class="font-serif text-3xl font-bold text-text-primary" id="tele-total">100,000</div>
           <div class="text-xs text-text-medium mt-1">Initial indexed ingestion</div>
         </div>
         <div class="border-r border-black/5 last:border-0 pr-4">
           <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">SQL Survivors</div>
-          <div class="font-headline text-3xl font-bold text-text-primary" id="tele-survivors">27,620</div>
+          <div class="font-serif text-3xl font-bold text-text-primary" id="tele-survivors">24,812</div>
           <div class="text-xs text-text-medium mt-1">Hard filter &amp; role pass</div>
         </div>
         <div class="border-r border-black/5 last:border-0 pr-4">
           <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Shortlisted</div>
-          <div class="font-headline text-3xl font-bold text-text-primary" id="tele-shortlisted">Top 100</div>
-          <div class="text-xs text-text-medium mt-1">Calibrated vector cohort</div>
+          <div class="font-serif text-3xl font-bold text-text-primary" id="tele-shortlisted">Top 100</div>
+          <div class="text-xs text-text-medium mt-1">Deterministic vector cohort</div>
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Spammer Rate</div>
-          <div class="font-headline text-3xl font-bold text-emerald-700" id="tele-spammer">0.0%</div>
+          <div class="font-serif text-3xl font-bold text-emerald-700" id="tele-spammer">0.0%</div>
           <div class="text-xs text-text-medium mt-1">Anti-gaming verified</div>
         </div>
       </section>
 
-      <!-- Database Views & Source Selector (Academic Requirement: Database Views) -->
-      <section class="glass-specular rounded-3xl p-5 mb-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div class="flex items-center space-x-2">
-            <span class="material-symbols-outlined text-text-medium text-lg">schema</span>
-            <span class="text-xs uppercase tracking-widest font-bold text-text-primary">Database Query Source:</span>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button class="view-btn active bg-black text-white text-xs px-4 py-2 rounded-full font-medium transition" data-view="">
-              Table: Candidate (Full Joined Feed)
-            </button>
-            <button class="view-btn glass-pill text-black text-xs px-4 py-2 rounded-full font-medium hover:bg-white transition" data-view="v_immediate_product_engineers">
-              View: v_immediate_product_engineers (&le;30d)
-            </button>
-            <button class="view-btn glass-pill text-black text-xs px-4 py-2 rounded-full font-medium hover:bg-white transition" data-view="v_verified_search_specialists">
-              View: v_verified_search_specialists (&ge;92 Score)
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Quick Tuning Strip (Stitch Screen 1) -->
-      <section class="glass-specular rounded-3xl p-6 mb-8">
+      <!-- 3. Quick Tuning Strip -->
+      <section class="glass-card rounded-3xl p-6 mb-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-4 border-b border-black/5 gap-3">
           <div>
-            <h2 class="font-headline text-lg font-bold text-text-primary">Interactive Sensitivity Sandbox</h2>
+            <h2 class="font-serif text-lg font-bold text-text-primary">Interactive Sensitivity Sandbox</h2>
             <p class="text-xs text-text-medium">Adjust candidate suitability weights for instant in-memory re-ranking (&lt;25ms latency).</p>
           </div>
           <div class="flex items-center space-x-2 text-xs text-text-medium">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span id="latency-indicator">Auto-Calibrated • Latency 18ms</span>
+            <span id="latency-indicator">Auto-Calibrated &bull; Latency 18ms</span>
           </div>
         </div>
 
@@ -537,40 +518,59 @@
               <span class="text-text-medium" id="val-notice">Standard (30d)</span>
             </div>
             <input type="range" id="slider-notice" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+            <div class="flex justify-between text-[10px] text-text-medium mt-1">
+              <span>Flexible</span>
+              <span>Immediate Joiners Only</span>
+            </div>
           </div>
+
           <div>
             <div class="flex justify-between text-xs mb-1.5 font-medium">
               <span class="text-text-primary">Product Co. Pedigree Bias</span>
               <span class="text-text-medium" id="val-product">High Affinity</span>
             </div>
             <input type="range" id="slider-product" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+            <div class="flex justify-between text-[10px] text-text-medium mt-1">
+              <span>Neutral</span>
+              <span>+25% Product Co. Boost</span>
+            </div>
           </div>
+
           <div>
             <div class="flex justify-between text-xs mb-1.5 font-medium">
               <span class="text-text-primary">Core Retrieval Strictness</span>
               <span class="text-text-medium" id="val-core">0.85 Threshold</span>
             </div>
             <input type="range" id="slider-core" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+            <div class="flex justify-between text-[10px] text-text-medium mt-1">
+              <span>Balanced</span>
+              <span>Geometric Mean Strict</span>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Main Candidate Leaderboard Table (Stitch Screen 1) -->
-      <section class="glass-specular rounded-3xl p-6 shadow-sm mb-12">
+      <!-- 4. Main Candidate Leaderboard Table -->
+      <section class="glass-card rounded-3xl p-6 shadow-sm mb-12">
         <div class="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-5 border-b border-black/5 gap-4">
           <div>
-            <h2 class="font-headline text-2xl font-bold text-text-primary">Ranked Candidate Feed</h2>
-            <p class="text-xs text-text-medium">Multi-table joined results from Candidate, RedrobSignals &amp; RankingSubmission.</p>
+            <h2 class="font-serif text-2xl font-bold text-text-primary">Ranked Candidate Feed</h2>
+            <p class="text-xs text-text-medium">Showing top evaluated Search &amp; Recommendation Engineers with 100% deterministic explainability.</p>
           </div>
 
+          <!-- Inline Filters -->
           <div class="flex flex-wrap items-center gap-2">
             <div class="relative">
-              <input type="text" id="search-input" placeholder="Search by name, company..." class="glass-pill text-xs rounded-full pl-8 pr-4 py-2 border border-black/10 text-text-primary focus:outline-none focus:ring-1 focus:ring-black w-60">
+              <input type="text" id="search-input" placeholder="Search by name, company, skill..." class="glass-pill text-xs rounded-full pl-8 pr-4 py-2 border border-black/10 text-text-primary placeholder:text-text-medium/60 focus:outline-none focus:ring-1 focus:ring-black w-60">
               <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-xs text-text-medium">search</span>
             </div>
+            <button id="chip-filter-all" class="filter-chip active bg-black text-white text-xs px-3.5 py-1.5 rounded-full font-medium transition">All Ranks</button>
+            <button id="chip-filter-product" class="filter-chip glass-pill text-black text-xs px-3.5 py-1.5 rounded-full font-medium hover:bg-white transition">Product Co.</button>
+            <button id="chip-filter-notice" class="filter-chip glass-pill text-black text-xs px-3.5 py-1.5 rounded-full font-medium hover:bg-white transition">&le; 30d Notice</button>
           </div>
         </div>
 
+        <!-- Candidate Table Grid -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead>
@@ -579,16 +579,22 @@
                 <th class="py-3 px-3 w-16 font-medium">Rank</th>
                 <th class="py-3 px-4 font-medium">Candidate &amp; Role</th>
                 <th class="py-3 px-3 font-medium">Score</th>
-                <th class="py-3 px-3 font-medium">YoE</th>
+                <th class="py-3 px-3 font-medium">Experience</th>
                 <th class="py-3 px-3 font-medium">Notice</th>
                 <th class="py-3 px-4 font-medium">Deterministic Recruiter Reasoning</th>
                 <th class="py-3 px-3 text-right font-medium">Action</th>
               </tr>
             </thead>
             <tbody id="candidate-table-body" class="divide-y divide-black/5">
-              <!-- Rendered dynamically -->
+              <!-- Dynamic rows populated by app.js -->
             </tbody>
           </table>
+        </div>
+
+        <!-- Footer Pagination / Status -->
+        <div class="mt-6 pt-4 border-t border-black/5 flex items-center justify-between text-xs text-text-medium">
+          <span id="footer-count">Showing 100 of 100 Shortlisted Candidates</span>
+          <span>Powered by Assay Hybrid DuckDB + Vector Search</span>
         </div>
       </section>
 

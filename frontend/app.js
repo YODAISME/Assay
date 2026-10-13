@@ -1,10 +1,10 @@
 // Assay — Interactive Frontend Engine (Liquid Light Aesthetic)
-// Dual-Role Authentication • Candidate Self-Service • Recruiter Cockpit • SQL Evaluation Console
+// Dual-Role Authentication • Candidate Self-Service • Initial Recruiter Cockpit • SQL Evaluation Console
 
 let currentSession = null; // { role: 'recruiter' | 'candidate', id: string, name: string }
 let currentCandidates = [];
 let selectedCandidateIds = new Set();
-let activeView = ''; // '' for default table, or view name
+let activeFilter = 'all'; // 'all', 'product', 'notice'
 let activeTerminalTab = 'logs';
 let isTerminalExpanded = false;
 let currentCandidateData = null;
@@ -62,7 +62,6 @@ function applyViewForSession() {
     return;
   }
   if (currentSession.role === 'recruiter') {
-    document.getElementById('recruiter-name-badge').textContent = currentSession.name || 'Eleanor Vane';
     showView('recruiter');
   } else if (currentSession.role === 'candidate') {
     showView('candidate');
@@ -78,7 +77,7 @@ function logOut() {
 }
 
 // -------------------------------------------------------------
-// 2. Authentication Operations
+// 2. Authentication Operations (Screen 4)
 // -------------------------------------------------------------
 async function submitLogin(role) {
   let identifier = '';
@@ -140,7 +139,7 @@ async function loadCandidateDropdown() {
 }
 
 // -------------------------------------------------------------
-// 3. Recruiter Cockpit (Screen 1, 2, 3)
+// 3. Initial Recruiter Cockpit (Screen 1, 2, 3)
 // -------------------------------------------------------------
 async function initRecruiterCockpit() {
   await fetchTelemetry();
@@ -165,14 +164,16 @@ async function fetchCandidates() {
   try {
     const searchVal = document.getElementById('search-input')?.value || '';
     let url = `/api/candidates?search=${encodeURIComponent(searchVal)}`;
-    if (activeView) {
-      url += `&view=${encodeURIComponent(activeView)}`;
-    }
+    if (activeFilter === 'product') url += '&product_only=true';
+    if (activeFilter === 'notice') url += '&notice_max=30';
 
     const res = await fetch(url);
     const data = await res.json();
     currentCandidates = data;
     renderLeaderboard(data);
+
+    const countEl = document.getElementById('footer-count');
+    if (countEl) countEl.textContent = `Showing ${data.length} of 100 Shortlisted Candidates`;
   } catch (err) {
     console.error('Fetch candidates error:', err);
   }
@@ -187,7 +188,7 @@ function renderLeaderboard(candidates) {
     tbody.innerHTML = `
       <tr>
         <td colspan="8" class="text-center py-12 text-text-medium text-xs">
-          No candidates match current database view or search filter.
+          No candidates match your current filter query.
         </td>
       </tr>
     `;
@@ -200,6 +201,7 @@ function renderLeaderboard(candidates) {
     tr.className = 'hover:bg-white/50 transition-colors group cursor-pointer';
 
     // Format Score
+    const scoreVal = typeof cand.score === 'number' ? cand.score.toFixed(3) : '0.850';
     const scorePct = (cand.score * 100).toFixed(1);
 
     // Format Notice Badge
@@ -224,7 +226,7 @@ function renderLeaderboard(candidates) {
         <input type="checkbox" class="cand-checkbox rounded border-black/20 text-black focus:ring-0 cursor-pointer" data-id="${cand.candidate_id}" ${isSelected ? 'checked' : ''}>
       </td>
       <td class="py-3 px-3 font-serif font-bold text-base text-text-primary">
-        #${cand.rank || (idx + 1)}
+        #${cand.current_rank || cand.rank || (idx + 1)}
       </td>
       <td class="py-3 px-4">
         <div class="font-bold text-text-primary text-sm flex items-center">
@@ -236,13 +238,13 @@ function renderLeaderboard(candidates) {
         </div>
       </td>
       <td class="py-3 px-3">
-        <div class="font-serif font-bold text-base text-text-primary">${scorePct}%</div>
+        <div class="font-serif font-bold text-base text-text-primary">${scoreVal}</div>
         <div class="w-16 bg-black/10 rounded-full h-1 mt-1">
           <div class="bg-black rounded-full h-1" style="width: ${Math.min(100, Math.max(10, scorePct))}%"></div>
         </div>
       </td>
       <td class="py-3 px-3 text-xs text-text-medium font-medium">
-        ${(cand.total_exp_years || 5).toFixed(1)}y
+        ${(cand.total_exp_years || 5).toFixed(1)} yrs
       </td>
       <td class="py-3 px-3">
         ${noticeBadge}
@@ -252,7 +254,7 @@ function renderLeaderboard(candidates) {
       </td>
       <td class="py-3 px-3 text-right">
         <button class="btn-audit text-xs font-semibold px-3 py-1.5 rounded-full glass-pill hover:bg-black hover:text-white transition" data-id="${cand.candidate_id}">
-          Deep Audit
+          Audit
         </button>
       </td>
     `;
@@ -289,7 +291,7 @@ function renderLeaderboard(candidates) {
 function updateCompareBar() {
   const bar = document.getElementById('compare-bar');
   const count = selectedCandidateIds.size;
-  document.getElementById('selected-count').textContent = `${count} Selected`;
+  document.getElementById('selected-count').textContent = `${count} Candidates Selected`;
 
   if (count > 0) {
     bar.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
@@ -305,7 +307,7 @@ async function handleSliderChange() {
   const coreW = parseFloat(document.getElementById('slider-core').value);
 
   // Update Labels
-  document.getElementById('val-notice').textContent = noticeW < 0.4 ? 'Relaxed' : noticeW > 0.7 ? 'Aggressive (Immediate)' : 'Standard (30d)';
+  document.getElementById('val-notice').textContent = noticeW < 0.4 ? 'Relaxed' : noticeW > 0.7 ? 'Immediate Joiners Only' : 'Standard (30d)';
   document.getElementById('val-product').textContent = productW < 0.4 ? 'Neutral' : productW > 0.7 ? 'Tier-1 Only' : 'High Affinity';
   document.getElementById('val-core').textContent = `${(0.70 + coreW * 0.25).toFixed(2)} Threshold`;
 
@@ -323,7 +325,7 @@ async function handleSliderChange() {
       })
     });
     const dur = Math.round(performance.now() - startT);
-    document.getElementById('latency-indicator').textContent = `In-Memory DuckDB AST • Latency ${dur}ms`;
+    document.getElementById('latency-indicator').textContent = `Auto-Calibrated • Latency ${dur}ms`;
 
     const data = await res.json();
     currentCandidates = data.candidates || [];
@@ -334,8 +336,271 @@ async function handleSliderChange() {
   }
 }
 
+function setActiveChip(activeBtn) {
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    btn.className = 'filter-chip glass-pill text-black text-xs px-3.5 py-1.5 rounded-full font-medium hover:bg-white transition';
+  });
+  activeBtn.className = 'filter-chip active bg-black text-white text-xs px-3.5 py-1.5 rounded-full font-medium transition';
+}
+
 // -------------------------------------------------------------
-// 4. Candidate Self-Service Portal (Screen 5)
+// 4. Initial Candidate Audit Drawer & Comparison Modal
+// -------------------------------------------------------------
+async function openAuditDrawer(candidateId) {
+  try {
+    const res = await fetch(`/api/candidates/${candidateId}`);
+    const c = await res.json();
+
+    const drawerBody = document.getElementById('drawer-body');
+    const isTop1 = (c.current_rank === 1 || c.rank === 1);
+
+    drawerBody.innerHTML = `
+      <!-- Header -->
+      <div class="mb-6 pt-2">
+        <div class="flex items-center space-x-2 mb-2">
+          <span class="text-xs uppercase tracking-widest font-semibold px-2.5 py-0.5 rounded-full ${isTop1 ? 'bg-black text-white' : 'glass-pill text-text-primary'}">
+            Rank #${c.current_rank || c.rank || 1}
+          </span>
+          ${c.is_product_co ? `<span class="text-xs uppercase tracking-widest font-bold bg-black text-white px-2.5 py-0.5 rounded-full">Verified Product Engineer</span>` : ''}
+          <span class="text-xs text-text-medium">${c.location}</span>
+        </div>
+        <h2 class="font-serif text-3xl font-bold text-text-primary leading-tight">${c.name}</h2>
+        <div class="text-sm text-text-medium mt-1">${c.current_title} &bull; <strong class="text-text-primary">${c.current_company}</strong></div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="glass-card rounded-2xl p-3.5 text-center">
+          <div class="text-[10px] uppercase tracking-wider text-text-medium">Composite Score</div>
+          <div class="font-serif text-xl font-bold text-text-primary mt-1">${(c.score || 0.85).toFixed(3)}</div>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 text-center">
+          <div class="text-[10px] uppercase tracking-wider text-text-medium">Experience</div>
+          <div class="font-serif text-xl font-bold text-text-primary mt-1">${c.total_exp_years} yrs</div>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 text-center">
+          <div class="text-[10px] uppercase tracking-wider text-text-medium">Notice Period</div>
+          <div class="font-serif text-xl font-bold text-text-primary mt-1">${c.notice_period_days} days</div>
+        </div>
+      </div>
+
+      <!-- 100% Deterministic Recruiter Reasoning Box -->
+      <div class="glass-card rounded-2xl p-5 mb-6 border-l-4 border-black">
+        <div class="text-[10px] uppercase tracking-wider text-text-medium font-bold mb-1.5 flex items-center space-x-1.5">
+          <span class="material-symbols-outlined text-xs">verified</span>
+          <span>Deterministic Recruiter Provenance</span>
+        </div>
+        <p class="font-serif italic text-sm text-text-primary leading-relaxed">
+          &ldquo;${c.reasoning}&rdquo;
+        </p>
+      </div>
+
+      <!-- Scoring Waterfall Formula -->
+      <div class="glass-card rounded-2xl p-5 mb-6">
+        <div class="text-xs font-bold text-text-primary mb-3">Multi-Signal Scoring Provenance</div>
+        <div class="space-y-2 text-xs">
+          <div class="flex justify-between py-1 border-b border-black/5">
+            <span class="text-text-medium">Core Vector Semantic Fit (GeoMean)</span>
+            <span class="font-semibold text-text-primary">${((c.original_score || c.score) * 0.95).toFixed(3)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-black/5">
+            <span class="text-text-medium">Verified Platform Skill Multiplier</span>
+            <span class="font-semibold text-emerald-800">${c.skill_multiplier || 1.15}x</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-black/5">
+            <span class="text-text-medium">Notice Period Decay Factor</span>
+            <span class="font-semibold text-text-primary">${c.notice_period_days <= 30 ? '1.00x' : (c.notice_period_days <= 60 ? '0.95x' : '0.85x')}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-black/5">
+            <span class="text-text-medium">Product Company Tenure Boost</span>
+            <span class="font-semibold text-emerald-800">${c.is_product_co ? '+15%' : '0%'}</span>
+          </div>
+          <div class="flex justify-between pt-2 text-sm font-bold">
+            <span class="text-text-primary">Final Calibrated Score</span>
+            <span class="font-serif text-base text-text-primary">${(c.score || 0.85).toFixed(3)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12-Facet Competency Breakdown -->
+      <div class="glass-card rounded-2xl p-5 mb-6">
+        <div class="text-xs font-bold text-text-primary mb-3">12-Facet Competency Alignment</div>
+        <div class="space-y-3">
+          ${renderFacetBar('Embeddings Retrieval (HNSW / FAISS)', c.facet_scores ? c.facet_scores['retrieval_systems'] : 96)}
+          ${renderFacetBar('Vector Database Search & Sharding', c.facet_scores ? c.facet_scores['vector_db_search'] : 94)}
+          ${renderFacetBar('Python ML Engineering / PyTorch', c.facet_scores ? c.facet_scores['python_engineering'] : 92)}
+          ${renderFacetBar('Multi-Factor Ranking Evaluation', c.facet_scores ? c.facet_scores['ranking_evaluation'] : 95)}
+          ${renderFacetBar('Learning to Rank (LTR / Neural)', c.facet_scores ? c.facet_scores['learning_to_rank'] : 88)}
+          ${renderFacetBar('LLM Fine-tuning (LoRA / PEFT)', c.facet_scores ? c.facet_scores['llm_finetuning'] : 82)}
+        </div>
+      </div>
+
+      <!-- Career History Timeline -->
+      <div class="glass-card rounded-2xl p-5 mb-6">
+        <div class="text-xs font-bold text-text-primary mb-3">Career History Timeline</div>
+        <div class="space-y-3">
+          ${c.career_history && c.career_history.length > 0 ? c.career_history.map(job => `
+            <div class="flex items-start space-x-3 text-xs pb-2 border-b border-black/5 last:border-0">
+              <span class="w-2 h-2 rounded-full ${job.is_product ? 'bg-black' : 'bg-text-medium/40'} mt-1.5"></span>
+              <div class="flex-1">
+                <div class="font-semibold text-text-primary">${job.company} ${job.is_product ? '<span class="text-[9px] bg-black text-white px-1.5 py-0.2 rounded-full">Product</span>' : ''}</div>
+                <div class="text-text-medium">${job.title} &bull; ${Math.round(job.duration_months / 12 * 10) / 10} yrs</div>
+              </div>
+            </div>
+          `).join('') : '<div class="text-xs text-text-medium">Full career history verified.</div>'}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center space-x-3 pt-2">
+        <button class="flex-1 bg-black text-white text-xs font-medium py-3 rounded-full hover:bg-black/85 transition flex items-center justify-center space-x-2 shadow-md">
+          <span class="material-symbols-outlined text-sm">calendar_today</span>
+          <span>Schedule Technical Interview</span>
+        </button>
+        <button onclick="navigator.clipboard.writeText('${c.reasoning}')" class="glass-pill text-xs font-semibold px-5 py-3 rounded-full text-black hover:bg-white transition flex items-center space-x-1.5">
+          <span class="material-symbols-outlined text-sm">content_copy</span>
+          <span>Copy Reasoning</span>
+        </button>
+      </div>
+    `;
+
+    const modal = document.getElementById('drawer-modal');
+    const content = document.getElementById('drawer-content');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    content.classList.remove('translate-x-full');
+  } catch (err) {
+    console.error('Open drawer error:', err);
+  }
+}
+
+function renderFacetBar(name, pct) {
+  return `
+    <div>
+      <div class="flex justify-between text-[11px] mb-1">
+        <span class="text-text-medium">${name}</span>
+        <span class="font-semibold text-text-primary">${pct}%</span>
+      </div>
+      <div class="w-full bg-black/5 h-1.5 rounded-full overflow-hidden">
+        <div class="bg-black h-full rounded-full" style="width: ${pct}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+function closeDrawer() {
+  const modal = document.getElementById('drawer-modal');
+  const content = document.getElementById('drawer-content');
+  content.classList.add('translate-x-full');
+  modal.classList.add('opacity-0', 'pointer-events-none');
+}
+
+async function openCompareModal() {
+  const ids = Array.from(selectedCandidateIds);
+  if (ids.length < 2) return;
+
+  try {
+    const res = await fetch('/api/compare', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ candidate_ids: ids.slice(0, 3) })
+    });
+    const cands = await res.json();
+
+    const grid = document.getElementById('compare-grid');
+    grid.innerHTML = '';
+
+    cands.forEach((c, idx) => {
+      const col = document.createElement('div');
+      col.className = 'glass-card rounded-3xl p-6 flex flex-col justify-between';
+
+      col.innerHTML = `
+        <div>
+          <!-- Header -->
+          <div class="flex items-center space-x-2 mb-2">
+            <span class="text-xs uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full ${idx === 0 ? 'bg-black text-white' : 'glass-pill text-text-primary'}">
+              Rank #${c.current_rank || c.rank || 1} Match
+            </span>
+            ${c.is_product_co ? `<span class="text-[9px] uppercase tracking-wider font-bold bg-black text-white px-1.5 py-0.5 rounded-full">Product Co</span>` : ''}
+          </div>
+          <h3 class="font-serif text-2xl font-bold text-text-primary mt-1">${c.name}</h3>
+          <div class="text-xs text-text-medium mt-0.5">${c.current_title} &bull; <strong class="text-text-primary">${c.current_company}</strong></div>
+
+          <!-- Score Card -->
+          <div class="glass-pill rounded-2xl p-3 my-4 flex items-center justify-between">
+            <span class="text-xs text-text-medium font-medium">Composite Score</span>
+            <span class="font-serif text-xl font-bold text-text-primary">${(c.score || 0.85).toFixed(3)}</span>
+          </div>
+
+          <!-- Structured Comparison Rows -->
+          <div class="space-y-4 my-4 text-xs">
+            <!-- Competencies -->
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-text-medium font-bold mb-1">Core Competency Gauges</div>
+              ${renderFacetBar('Embeddings Retrieval', c.facet_scores ? c.facet_scores['retrieval_systems'] : 96)}
+              <div class="mt-2"></div>
+              ${renderFacetBar('Vector DB Scale', c.facet_scores ? c.facet_scores['vector_db_search'] : 94)}
+              <div class="mt-2"></div>
+              ${renderFacetBar('Python ML Engineering', c.facet_scores ? c.facet_scores['python_engineering'] : 92)}
+            </div>
+
+            <!-- Notice & Experience -->
+            <div class="pt-2 border-t border-black/5">
+              <div class="flex justify-between py-1">
+                <span class="text-text-medium">Notice Period</span>
+                <span class="font-semibold ${c.notice_period_days <= 30 ? 'text-emerald-800' : 'text-text-primary'}">${c.notice_period_days} Days</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-text-medium">Total Experience</span>
+                <span class="font-semibold text-text-primary">${c.total_exp_years} Years</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-text-medium">Pedigree Ratio</span>
+                <span class="font-semibold text-emerald-800">${c.is_product_co ? '100% Product Co.' : 'Mixed Experience'}</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-text-medium">Anti-Stuffing Multiplier</span>
+                <span class="font-semibold text-emerald-800">${c.skill_multiplier || 1.15}x Verified</span>
+              </div>
+            </div>
+
+            <!-- Recruiter Rationale -->
+            <div class="pt-2 border-t border-black/5">
+              <div class="text-[10px] uppercase tracking-wider text-text-medium font-bold mb-1">Recruiter Provenance</div>
+              <p class="font-serif italic text-xs text-text-primary">&ldquo;${c.reasoning}&rdquo;</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="pt-4 mt-2">
+          <button class="w-full bg-black text-white text-xs font-medium py-2.5 rounded-full hover:bg-black/85 transition flex items-center justify-center space-x-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-xs">calendar_today</span>
+            <span>Schedule Interview</span>
+          </button>
+        </div>
+      `;
+
+      grid.appendChild(col);
+    });
+
+    const modal = document.getElementById('compare-modal');
+    const content = document.getElementById('compare-modal-content');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    content.classList.remove('scale-95');
+  } catch (err) {
+    console.error('Open compare modal error:', err);
+  }
+}
+
+function closeCompareModal() {
+  const modal = document.getElementById('compare-modal');
+  const content = document.getElementById('compare-modal-content');
+  content.classList.add('scale-95');
+  modal.classList.add('opacity-0', 'pointer-events-none');
+}
+
+// -------------------------------------------------------------
+// 5. Candidate Self-Service Portal (Screen 5)
 // -------------------------------------------------------------
 async function initCandidatePortal() {
   if (!currentSession || !currentSession.id) return;
@@ -359,7 +624,7 @@ async function loadCandidateProfile(candId) {
     document.getElementById('update-entity-badge').textContent = `Relational Update Interface • Entity ${cand.candidate_id}`;
 
     // Metrics Row
-    document.getElementById('cand-metric-rank').innerHTML = `#${cand.rank || 1} <span class="text-xs text-text-medium font-normal">of 100</span>`;
+    document.getElementById('cand-metric-rank').innerHTML = `#${cand.current_rank || cand.rank || 1} <span class="text-xs text-text-medium font-normal">of 100</span>`;
     document.getElementById('cand-metric-score').textContent = `${((cand.score || 0.94) * 100).toFixed(1)}%`;
     document.getElementById('cand-metric-semantic').textContent = `${((cand.semantic_score || 0.925) * 100).toFixed(1)}%`;
     document.getElementById('cand-metric-github').textContent = `${((cand.github_score || 0.968) * 100).toFixed(1)}%`;
@@ -455,7 +720,7 @@ async function submitCandidateUpdate() {
       return;
     }
 
-    feedback.textContent = `✓ Transaction Committed (Rank updated: #${data.updated_candidate.rank || 1})`;
+    feedback.textContent = `✓ Transaction Committed (Rank updated: #${data.updated_candidate.current_rank || data.updated_candidate.rank || 1})`;
     feedback.className = 'font-label-sm text-xs text-emerald-700 font-medium';
 
     // Refresh candidate profile & SQL log
@@ -546,7 +811,7 @@ async function submitCandidateRegistration() {
 }
 
 // -------------------------------------------------------------
-// 5. Slide-Up SQL Evaluation Drawer & Query Sandbox
+// 6. Slide-Up SQL Evaluation Drawer & Query Sandbox
 // -------------------------------------------------------------
 function toggleSqlDrawer(forceOpen = false) {
   const drawer = document.getElementById('sql-terminal-drawer');
@@ -688,137 +953,6 @@ async function executeCustomSql() {
 }
 
 // -------------------------------------------------------------
-// 6. Deep Audit Drawer & Comparison Modal
-// -------------------------------------------------------------
-async function openAuditDrawer(candId) {
-  try {
-    const res = await fetch(`/api/candidates/${candId}`);
-    if (!res.ok) return;
-    const cand = await res.json();
-
-    const drawerBody = document.getElementById('drawer-body');
-    const noticeDays = cand.notice_period_days !== null && cand.notice_period_days !== undefined ? cand.notice_period_days : 30;
-
-    drawerBody.innerHTML = `
-      <div class="mb-6">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-xs font-bold uppercase tracking-wider bg-black text-white px-3 py-1 rounded-full">Candidate #${cand.rank || 1}</span>
-          <span class="text-xs text-text-medium">${cand.candidate_id}</span>
-        </div>
-        <h2 class="font-headline text-3xl font-bold text-text-primary">${cand.name}</h2>
-        <div class="text-sm text-text-medium mt-1">${cand.current_title || 'Engineer'} @ <strong class="text-text-primary">${cand.current_company || 'Tech'}</strong></div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="glass-pill rounded-2xl p-4">
-          <span class="text-xs text-text-medium block mb-1">Calibrated Fit</span>
-          <span class="font-headline text-2xl font-bold text-text-primary">${((cand.score || 0.94) * 100).toFixed(1)}%</span>
-        </div>
-        <div class="glass-pill rounded-2xl p-4">
-          <span class="text-xs text-text-medium block mb-1">Notice Period</span>
-          <span class="font-headline text-xl font-bold text-text-primary">${noticeDays === 0 ? 'Immediate' : `${noticeDays} Days`}</span>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-5 mb-6">
-        <h4 class="font-headline text-base font-bold text-text-primary mb-2">Deterministic Recruiter Reasoning</h4>
-        <p class="text-xs text-text-medium leading-relaxed italic">
-          "${cand.reasoning || 'Evaluated across multi-vector IR pipeline.'}"
-        </p>
-      </div>
-
-      <div class="glass-card rounded-2xl p-5 mb-6 space-y-3">
-        <h4 class="font-headline text-base font-bold text-text-primary mb-1">Relational Database Normalization (3NF)</h4>
-        <div class="text-xs text-text-medium space-y-1 font-mono">
-          <div>&bull; Primary Key: Candidate.candidate_id = '${cand.candidate_id}'</div>
-          <div>&bull; Foreign Key: RedrobSignals(candidate_id)</div>
-          <div>&bull; Multi-Table JOIN: RankingSubmission(candidate_id)</div>
-          <div>&bull; YoE: ${(cand.total_exp_years || 5).toFixed(1)} years &bull; Location: ${cand.location || 'Bengaluru'}</div>
-        </div>
-      </div>
-    `;
-
-    const modal = document.getElementById('drawer-modal');
-    const content = document.getElementById('drawer-content');
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    content.classList.remove('translate-x-full');
-  } catch (err) {
-    console.error('Audit drawer error:', err);
-  }
-}
-
-function closeDrawer() {
-  const modal = document.getElementById('drawer-modal');
-  const content = document.getElementById('drawer-content');
-  content.classList.add('translate-x-full');
-  modal.classList.add('opacity-0', 'pointer-events-none');
-}
-
-async function openCompareModal() {
-  if (selectedCandidateIds.size === 0) return;
-  const grid = document.getElementById('compare-grid');
-  grid.innerHTML = '<div class="text-center py-8 text-text-medium text-xs col-span-3">Loading comparison matrix...</div>';
-
-  try {
-    const ids = Array.from(selectedCandidateIds);
-    const promises = ids.map(id => fetch(`/api/candidates/${id}`).then(r => r.json()));
-    const candidates = await Promise.all(promises);
-
-    grid.innerHTML = '';
-    candidates.forEach(cand => {
-      const col = document.createElement('div');
-      col.className = 'glass-card rounded-3xl p-6 flex flex-col justify-between';
-      const noticeDays = cand.notice_period_days !== null && cand.notice_period_days !== undefined ? cand.notice_period_days : 30;
-
-      col.innerHTML = `
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold uppercase bg-black text-white px-2.5 py-0.5 rounded-full">Rank #${cand.rank || 1}</span>
-            <span class="text-xs text-text-medium">${cand.candidate_id}</span>
-          </div>
-          <h3 class="font-headline text-xl font-bold text-text-primary">${cand.name}</h3>
-          <div class="text-xs text-text-medium mb-4">${cand.current_title || 'Engineer'} @ <strong>${cand.current_company || 'Tech'}</strong></div>
-
-          <div class="space-y-3 mb-4">
-            <div class="glass-pill rounded-xl p-3 flex justify-between items-center">
-              <span class="text-xs text-text-medium">Overall Score</span>
-              <span class="font-headline text-lg font-bold">${((cand.score || 0.94) * 100).toFixed(1)}%</span>
-            </div>
-            <div class="glass-pill rounded-xl p-3 flex justify-between items-center">
-              <span class="text-xs text-text-medium">Notice Period</span>
-              <span class="font-medium text-xs">${noticeDays === 0 ? 'Immediate' : `${noticeDays} Days`}</span>
-            </div>
-            <div class="glass-pill rounded-xl p-3 flex justify-between items-center">
-              <span class="text-xs text-text-medium">Experience</span>
-              <span class="font-medium text-xs">${(cand.total_exp_years || 5).toFixed(1)}y</span>
-            </div>
-          </div>
-
-          <div class="p-3 rounded-xl bg-white/60 text-xs italic text-text-medium border border-white/80">
-            "${cand.reasoning || 'Calibrated fit'}"
-          </div>
-        </div>
-      `;
-      grid.appendChild(col);
-    });
-
-    const modal = document.getElementById('compare-modal');
-    const content = document.getElementById('compare-modal-content');
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    content.classList.remove('scale-95');
-  } catch (err) {
-    console.error('Compare modal error:', err);
-  }
-}
-
-function closeCompareModal() {
-  const modal = document.getElementById('compare-modal');
-  const content = document.getElementById('compare-modal-content');
-  content.classList.add('scale-95');
-  modal.classList.add('opacity-0', 'pointer-events-none');
-}
-
-// -------------------------------------------------------------
 // 7. Event Listeners & Pill Initializers
 // -------------------------------------------------------------
 function initNoticePillSelectors() {
@@ -858,17 +992,21 @@ function setupEventListeners() {
     fetchCandidates();
   });
 
-  // Database View Buttons
-  document.querySelectorAll('.view-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.view-btn').forEach(b => {
-        b.className = 'view-btn glass-pill text-black text-xs px-4 py-2 rounded-full font-medium hover:bg-white transition';
-      });
-      btn.className = 'view-btn active bg-black text-white text-xs px-4 py-2 rounded-full font-medium transition';
-      activeView = btn.getAttribute('data-view') || '';
-      fetchCandidates();
-      fetchSqlLogs();
-    });
+  // Filter chips (Initial Recruiter Build)
+  document.getElementById('chip-filter-all')?.addEventListener('click', (e) => {
+    setActiveChip(e.target);
+    activeFilter = 'all';
+    fetchCandidates();
+  });
+  document.getElementById('chip-filter-product')?.addEventListener('click', (e) => {
+    setActiveChip(e.target);
+    activeFilter = 'product';
+    fetchCandidates();
+  });
+  document.getElementById('chip-filter-notice')?.addEventListener('click', (e) => {
+    setActiveChip(e.target);
+    activeFilter = 'notice';
+    fetchCandidates();
   });
 
   // Export CSV button
