@@ -3,6 +3,7 @@ import re
 import ast
 import json
 import time
+import duckdb
 import numpy as np
 import pandas as pd
 
@@ -10,211 +11,464 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SUBMISSION_PATH = os.path.join(PROJECT_ROOT, "v2", "submission.csv")
 SURVIVORS_PATH = os.path.join(PROJECT_ROOT, "v2", "survivors.csv")
 FACET_METADATA_PATH = os.path.join(PROJECT_ROOT, "jd_facet_metadata.json")
-FACET_EMB_PATH = os.path.join(PROJECT_ROOT, "jd_facet_embeddings.npy")
-CAND_EMB_PATH = os.path.join(PROJECT_ROOT, "candidate_embeddings_f16.parquet")
 
-class CandidateEngine:
+class RelationalCandidateEngine:
     def __init__(self):
-        self.candidates_df = None
-        self.survivors_count = 24812
-        self.total_pool = 100000
-        self.spammer_rate = 0.0
-        self.facet_metadata = []
-        self.facet_embeddings = None
-        self.candidate_embeddings = {}
+        # In-memory DuckDB connection for pure relational queries, joins, views, and DML
+        self.con = duckdb.connect(database=":memory:")
+        self.sql_transaction_logs = []
         self.current_weights = {
-            "notice_sensitivity": 0.5, # 0.0 to 1.0 (0=standard, 1=strict)
-            "product_bias": 0.5,       # 0.0 to 1.0 (0=neutral, 1=high)
-            "core_strictness": 0.5     # 0.0 to 1.0 (0=standard, 1=high)
+            "notice_sensitivity": 0.5,
+            "product_bias": 0.5,
+            "core_strictness": 0.5
         }
-        self.baseline_ranks = {}
-        self._load_data()
+        self._init_database()
 
-    def _load_data(self):
-        print("Loading Assay Candidate Engine data...")
+    def _log_sql(self, statement: str, operation_type: str, execution_time_ms: float, rows_affected: int = 1):
+        log_entry = {
+            "timestamp": time.strftime("%H:%M:%S"),
+            "operation": operation_type.upper(),
+            "query": statement.strip(),
+            "latency_ms": round(execution_time_ms, 2),
+            "rows_affected": rows_affected
+        }
+        self.sql_transaction_logs.insert(0, log_entry)
+        if len(self.sql_transaction_logs) > 50:
+            self.sql_transaction_logs.pop()
+
+    def _init_database(self):
+        print("Initializing DuckDB Relational Database Schema & Views...")
         t0 = time.perf_counter()
 
-        # 1. Load JD Facet metadata
-        if os.path.exists(FACET_METADATA_PATH):
-            with open(FACET_METADATA_PATH, "r", encoding="utf-8") as f:
-                self.facet_metadata = json.load(f)
-        
-        # 2. Load Facet Embeddings
-        if os.path.exists(FACET_EMB_PATH):
-            self.facet_embeddings = np.load(FACET_EMB_PATH)
-            norms = np.linalg.norm(self.facet_embeddings, axis=1, keepdims=True)
-            self.facet_embeddings = self.facet_embeddings / np.where(norms == 0, 1.0, norms)
+        # 1. Create Core Tables in 3NF
+        self.con.execute("""
+            CREATE TABLE Candidate (
+                candidate_id VARCHAR PRIMARY KEY,
+                name VARCHAR,
+                headline VARCHAR,
+                current_title VARCHAR,
+                current_company VARCHAR,
+                location VARCHAR,
+                country VARCHAR DEFAULT 'India',
+                total_exp_years DOUBLE,
+                is_product_co BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        # 3. Load Submission Top 100
+            CREATE TABLE RedrobSignals (
+                candidate_id VARCHAR PRIMARY KEY,
+                notice_period_days INTEGER,
+                willing_to_relocate BOOLEAN DEFAULT TRUE,
+                github_activity_score DOUBLE DEFAULT 0.85,
+                recruiter_response_rate DOUBLE DEFAULT 0.90,
+                skill_multiplier DOUBLE DEFAULT 1.05
+            );
+
+            CREATE TABLE Skills (
+                skill_id VARCHAR PRIMARY KEY,
+                candidate_id VARCHAR,
+                skill_name VARCHAR,
+                proficiency VARCHAR,
+                assessment_score DOUBLE
+            );
+
+            CREATE TABLE CareerHistory (
+                history_id VARCHAR PRIMARY KEY,
+                candidate_id VARCHAR,
+                company VARCHAR,
+                title VARCHAR,
+                duration_months INTEGER,
+                is_product BOOLEAN
+            );
+
+            CREATE TABLE RankingSubmission (
+                candidate_id VARCHAR PRIMARY KEY,
+                current_rank INTEGER,
+                original_rank INTEGER,
+                rank_delta INTEGER DEFAULT 0,
+                score DOUBLE,
+                original_score DOUBLE,
+                reasoning VARCHAR
+            );
+        """)
+
+        # 2. Populate tables from v2/submission.csv and v2/survivors.csv
         sub_df = pd.read_csv(SUBMISSION_PATH)
-        for _, row in sub_df.iterrows():
-            self.baseline_ranks[row["candidate_id"]] = int(row["rank"])
-
-        # 4. Load Survivors to enrich candidate data
         surv_df = pd.read_csv(SURVIVORS_PATH)
-        self.survivors_count = len(surv_df)
-
-        # Merge Top 100 with rich profile information
         merged = sub_df.merge(surv_df, on="candidate_id", how="left")
-        
-        # 5. Load candidate embeddings for Top 100
-        if os.path.exists(CAND_EMB_PATH):
-            cand_emb_df = pd.read_parquet(CAND_EMB_PATH)
-            top_ids = set(sub_df["candidate_id"].values)
-            filtered_emb = cand_emb_df[cand_emb_df["candidate_id"].isin(top_ids)]
-            for _, r in filtered_emb.iterrows():
-                vec = np.array(r["embedding"], dtype=np.float32)
-                norm = np.linalg.norm(vec)
-                self.candidate_embeddings[r["candidate_id"]] = vec / (norm if norm > 0 else 1.0)
 
-        # Pre-compute facet alignments and parsed details for all Top 100
-        records = []
-        for _, row in merged.iterrows():
-            cid = row["candidate_id"]
-            
-            # Compute 12 facet similarities if vectors exist
-            facet_scores = {}
-            if cid in self.candidate_embeddings and self.facet_embeddings is not None:
-                sims = self.candidate_embeddings[cid] @ self.facet_embeddings.T
-                for idx, m in enumerate(self.facet_metadata):
-                    # Scale to 0 - 100 percentage
-                    pct = int(np.clip((sims[idx] + 0.2) / 1.2 * 100, 10, 99))
-                    facet_scores[m["label"]] = pct
-            else:
-                for m in self.facet_metadata:
-                    tier = m.get("tier", "core")
-                    facet_scores[m["label"]] = 95 if tier == "core" else (85 if tier == "bonus" else 0)
-
-            # Parse skills safely
-            skills_raw = row.get("skills", "")
-            parsed_skills = []
-            if isinstance(skills_raw, str) and skills_raw.strip():
-                try:
-                    items = ast.literal_eval(skills_raw) if ("[" in skills_raw and "]" in skills_raw) else []
-                    for it in items[:6]:
-                        if isinstance(it, dict) and "name" in it:
-                            parsed_skills.append({
-                                "name": it.get("name", "Skill"),
-                                "proficiency": it.get("proficiency", "advanced"),
-                                "endorsements": it.get("endorsements", 5)
-                            })
-                except Exception:
-                    pass
-
-            # Parse career history safely
-            career_raw = row.get("career_history", "")
-            parsed_career = []
-            is_product_co = False
-            product_tenure_years = 0.0
-            
-            PRODUCT_COMPANIES = {
-                'cred', 'swiggy', 'zomato', 'pharmeasy', 'flipkart', 'meesho', 'razorpay',
-                'zepto', 'sarvam ai', 'ola', 'uber', 'amazon', 'rephrase.ai', 'nykaa',
-                'upgrad', 'zoho', 'verloop.io', 'mad street den'
-            }
-
-            if isinstance(career_raw, str) and career_raw.strip():
-                try:
-                    jobs = ast.literal_eval(career_raw) if ("[" in career_raw and "]" in career_raw) else []
-                    for j in jobs:
-                        if isinstance(j, dict):
-                            comp = str(j.get("company", "")).strip()
-                            dur = int(j.get("duration_months", 12))
-                            is_prod = any(p in comp.lower() for p in PRODUCT_COMPANIES)
-                            if is_prod:
-                                is_product_co = True
-                                product_tenure_years += (dur / 12.0)
-                            parsed_career.append({
-                                "company": comp,
-                                "title": j.get("title", "Engineer"),
-                                "duration_months": dur,
-                                "is_product": is_prod
-                            })
-                except Exception:
-                    pass
-
-            np_days = int(row.get("notice_period_days", 30)) if pd.notna(row.get("notice_period_days")) else 30
-            yoe = float(row.get("total_exp_years", 5.0)) if pd.notna(row.get("total_exp_years")) else 5.0
-            score = float(row.get("score", 0.8))
-            gh_score = float(row.get("github_activity_score", 0.85)) if pd.notna(row.get("github_activity_score")) else 0.85
-            skill_mult = 1.15 if is_product_co else 1.05
-
-            record = {
-                "candidate_id": cid,
-                "name": str(row.get("name", "Anonymous Candidate")),
-                "headline": str(row.get("headline", "")),
-                "current_title": str(row.get("current_title", "Search / ML Engineer")),
-                "current_company": str(row.get("current_company", "Tech Company")),
-                "location": str(row.get("location", "India")),
-                "country": str(row.get("country", "India")),
-                "total_exp_years": round(yoe, 1),
-                "notice_period_days": np_days,
-                "is_product_co": is_product_co,
-                "product_tenure_years": round(product_tenure_years, 1),
-                "skill_multiplier": skill_mult,
-                "github_activity_score": round(gh_score, 2),
-                "original_rank": int(row.get("rank", 1)),
-                "current_rank": int(row.get("rank", 1)),
-                "rank_delta": 0,
-                "score": round(score, 4),
-                "original_score": round(score, 4),
-                "reasoning": str(row.get("reasoning", "")),
-                "facet_scores": facet_scores,
-                "skills": parsed_skills,
-                "career_history": parsed_career,
-                "assessments": [
-                    {"skill": "Information Retrieval", "score": min(98, int(85 + score * 14))},
-                    {"skill": "Vector DB & Embeddings", "score": min(97, int(82 + score * 15))},
-                    {"skill": "PyTorch / Python ML", "score": min(95, int(80 + score * 15))}
-                ]
-            }
-            records.append(record)
-
-        self.candidates_df = pd.DataFrame(records)
-        print(f"Loaded {len(self.candidates_df)} candidates in {time.perf_counter()-t0:.2f}s")
-
-    def get_telemetry(self):
-        return {
-            "total_candidates": self.total_pool,
-            "sql_survivors": self.survivors_count,
-            "shortlisted_count": len(self.candidates_df) if self.candidates_df is not None else 100,
-            "spammer_rate_pct": self.spammer_rate,
-            "pipeline_mode": "WARM_IN_MEMORY",
-            "latency_ms": 18
+        PRODUCT_COMPANIES = {
+            'cred', 'swiggy', 'zomato', 'pharmeasy', 'flipkart', 'meesho', 'razorpay',
+            'zepto', 'sarvam ai', 'ola', 'uber', 'amazon', 'rephrase.ai', 'nykaa',
+            'upgrad', 'zoho', 'verloop.io', 'mad street den'
         }
 
-    def get_candidates(self, search: str = None, notice_max: int = None, product_only: bool = False):
-        if self.candidates_df is None:
-            return []
+        cand_rows = []
+        sig_rows = []
+        skill_rows = []
+        history_rows = []
+        rank_rows = []
 
-        df = self.candidates_df.copy()
+        skill_counter = 1
+        hist_counter = 1
 
+        for _, row in merged.iterrows():
+            cid = str(row["candidate_id"])
+            name = str(row.get("name", "Anonymous Candidate"))
+            title = str(row.get("current_title", "Search / ML Engineer"))
+            comp = str(row.get("current_company", "Tech Company"))
+            loc = str(row.get("location", "Noida, India"))
+            yoe = float(row.get("total_exp_years", 5.0)) if pd.notna(row.get("total_exp_years")) else 5.0
+            
+            is_prod = any(p in comp.lower() for p in PRODUCT_COMPANIES)
+            cand_rows.append((cid, name, str(row.get("headline", "")), title, comp, loc, 'India', yoe, is_prod))
+
+            np_days = int(row.get("notice_period_days", 30)) if pd.notna(row.get("notice_period_days")) else 30
+            sig_rows.append((cid, np_days, True, 0.88, 0.92, 1.15 if is_prod else 1.05))
+
+            score = float(row.get("score", 0.8))
+            rank_val = int(row.get("rank", 1))
+            reason = str(row.get("reasoning", ""))
+            rank_rows.append((cid, rank_val, rank_val, 0, score, score, reason))
+
+            # Skills
+            skill_rows.append((f"SK_{skill_counter}", cid, "Information Retrieval", "Advanced", min(98.0, 85.0 + score * 14)))
+            skill_counter += 1
+            skill_rows.append((f"SK_{skill_counter}", cid, "Vector DB & Embeddings", "Advanced", min(97.0, 82.0 + score * 15)))
+            skill_counter += 1
+            skill_rows.append((f"SK_{skill_counter}", cid, "PyTorch / ML Engineering", "Expert", min(95.0, 80.0 + score * 15)))
+            skill_counter += 1
+
+            # Career History
+            history_rows.append((f"CH_{hist_counter}", cid, comp, title, int(yoe * 12), is_prod))
+            hist_counter += 1
+
+        self.con.executemany("INSERT INTO Candidate VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)", cand_rows)
+        self.con.executemany("INSERT INTO RedrobSignals VALUES (?, ?, ?, ?, ?, ?)", sig_rows)
+        self.con.executemany("INSERT INTO Skills VALUES (?, ?, ?, ?, ?)", skill_rows)
+        self.con.executemany("INSERT INTO CareerHistory VALUES (?, ?, ?, ?, ?, ?)", history_rows)
+        self.con.executemany("INSERT INTO RankingSubmission VALUES (?, ?, ?, ?, ?, ?, ?)", rank_rows)
+
+        # 3. Create Pre-Compiled Relational Views (Academic Deliverable)
+        self.con.execute("""
+            CREATE VIEW v_immediate_product_engineers AS
+            SELECT 
+                c.candidate_id, 
+                c.name, 
+                c.current_title, 
+                c.current_company, 
+                c.total_exp_years, 
+                s.notice_period_days,
+                r.score
+            FROM Candidate c
+            INNER JOIN RedrobSignals s ON c.candidate_id = s.candidate_id
+            INNER JOIN RankingSubmission r ON c.candidate_id = r.candidate_id
+            WHERE s.notice_period_days <= 30 AND c.is_product_co = TRUE
+            ORDER BY r.score DESC;
+
+            CREATE VIEW v_verified_search_specialists AS
+            SELECT 
+                c.candidate_id, 
+                c.name, 
+                c.current_company, 
+                sk.skill_name, 
+                sk.assessment_score,
+                r.score
+            FROM Candidate c
+            INNER JOIN Skills sk ON c.candidate_id = sk.candidate_id
+            INNER JOIN RankingSubmission r ON c.candidate_id = r.candidate_id
+            WHERE sk.assessment_score >= 92
+            ORDER BY r.score DESC;
+
+            CREATE VIEW v_candidate_dossier_joined AS
+            SELECT 
+                c.candidate_id,
+                c.name,
+                c.current_title,
+                c.current_company,
+                c.location,
+                c.total_exp_years,
+                c.is_product_co,
+                s.notice_period_days,
+                s.skill_multiplier,
+                s.github_activity_score,
+                r.current_rank,
+                r.rank_delta,
+                r.score,
+                r.reasoning
+            FROM Candidate c
+            INNER JOIN RedrobSignals s ON c.candidate_id = s.candidate_id
+            INNER JOIN RankingSubmission r ON c.candidate_id = r.candidate_id;
+        """)
+
+        elapsed = (time.perf_counter() - t0) * 1000
+        self._log_sql(
+            "CREATE TABLES Candidate, RedrobSignals, Skills, CareerHistory, RankingSubmission; CREATE VIEW v_immediate_product_engineers; CREATE VIEW v_verified_search_specialists;",
+            "DDL_INIT",
+            elapsed,
+            len(cand_rows)
+        )
+        print(f"DuckDB schema & views established in {elapsed:.2f}ms")
+
+    # -------------------------------------------------------------
+    # DML: READ / SELECT
+    # -------------------------------------------------------------
+    def get_candidates(self, search: str = None, notice_max: int = None, product_only: bool = False, view_name: str = None):
+        t0 = time.perf_counter()
+        
+        if view_name == "v_immediate_product_engineers":
+            sql = "SELECT * FROM v_immediate_product_engineers"
+            df = self.con.execute(sql).df()
+            elapsed = (time.perf_counter() - t0) * 1000
+            self._log_sql(sql, "SELECT_VIEW", elapsed, len(df))
+            return df.to_dict(orient="records")
+        elif view_name == "v_verified_search_specialists":
+            sql = "SELECT * FROM v_verified_search_specialists"
+            df = self.con.execute(sql).df()
+            elapsed = (time.perf_counter() - t0) * 1000
+            self._log_sql(sql, "SELECT_VIEW", elapsed, len(df))
+            return df.to_dict(orient="records")
+
+        # Standard Multi-Table Joined Query
+        sql = """
+            SELECT 
+                c.candidate_id, c.name, c.headline, c.current_title, c.current_company,
+                c.location, c.total_exp_years, c.is_product_co,
+                s.notice_period_days, s.skill_multiplier, s.github_activity_score, s.willing_to_relocate,
+                r.current_rank, r.original_rank, r.rank_delta, r.score, r.reasoning
+            FROM Candidate c
+            INNER JOIN RedrobSignals s ON c.candidate_id = s.candidate_id
+            INNER JOIN RankingSubmission r ON c.candidate_id = r.candidate_id
+            WHERE 1=1
+        """
+        params = []
         if search:
-            s = search.lower().strip()
-            df = df[
-                df["name"].str.lower().str.contains(s) |
-                df["current_company"].str.lower().str.contains(s) |
-                df["current_title"].str.lower().str.contains(s) |
-                df["candidate_id"].str.lower().str.contains(s)
-            ]
-
+            sql += " AND (lower(c.name) LIKE ? OR lower(c.current_company) LIKE ? OR lower(c.current_title) LIKE ?)"
+            s_param = f"%{search.lower().strip()}%"
+            params.extend([s_param, s_param, s_param])
         if notice_max:
-            df = df[df["notice_period_days"] <= notice_max]
-
+            sql += " AND s.notice_period_days <= ?"
+            params.append(notice_max)
         if product_only:
-            df = df[df["is_product_co"] == True]
+            sql += " AND c.is_product_co = TRUE"
 
-        df = df.sort_values(by="current_rank", ascending=True)
-        return df.to_dict(orient="records")
+        sql += " ORDER BY r.current_rank ASC"
+
+        df = self.con.execute(sql, params).df()
+        elapsed = (time.perf_counter() - t0) * 1000
+        self._log_sql(sql, "SELECT_JOIN", elapsed, len(df))
+
+        # Attach mock facet scores for drawer rendering
+        records = df.to_dict(orient="records")
+        for r in records:
+            r["facet_scores"] = {
+                "retrieval_systems": min(99, int(85 + r["score"] * 14)),
+                "vector_db_search": min(98, int(82 + r["score"] * 15)),
+                "python_engineering": min(95, int(80 + r["score"] * 15)),
+                "ranking_evaluation": min(96, int(84 + r["score"] * 13)),
+                "learning_to_rank": min(90, int(75 + r["score"] * 15)),
+                "llm_finetuning": min(85, int(70 + r["score"] * 15))
+            }
+        return records
 
     def get_candidate_detail(self, candidate_id: str):
-        if self.candidates_df is None:
+        t0 = time.perf_counter()
+        
+        # 4-Table Inner and Left Join Query
+        sql = """
+            SELECT 
+                c.candidate_id, c.name, c.headline, c.current_title, c.current_company,
+                c.location, c.country, c.total_exp_years, c.is_product_co,
+                s.notice_period_days, s.willing_to_relocate, s.github_activity_score, s.skill_multiplier,
+                r.current_rank, r.rank_delta, r.score, r.original_score, r.reasoning
+            FROM Candidate c
+            INNER JOIN RedrobSignals s ON c.candidate_id = s.candidate_id
+            INNER JOIN RankingSubmission r ON c.candidate_id = r.candidate_id
+            WHERE c.candidate_id = ?
+        """
+        cand_df = self.con.execute(sql, [candidate_id]).df()
+        if cand_df.empty:
             return None
-        match = self.candidates_df[self.candidates_df["candidate_id"] == candidate_id]
-        if match.empty:
-            return None
-        return match.iloc[0].to_dict()
 
+        # Fetch skills
+        skills_sql = "SELECT skill_name, proficiency, assessment_score FROM Skills WHERE candidate_id = ?"
+        skills_df = self.con.execute(skills_sql, [candidate_id]).df()
+
+        # Fetch career history
+        hist_sql = "SELECT company, title, duration_months, is_product FROM CareerHistory WHERE candidate_id = ?"
+        hist_df = self.con.execute(hist_sql, [candidate_id]).df()
+
+        elapsed = (time.perf_counter() - t0) * 1000
+        self._log_sql(f"{sql}; {skills_sql}; {hist_sql}", "MULTI_TABLE_JOIN", elapsed, 1)
+
+        record = cand_df.iloc[0].to_dict()
+        record["skills"] = skills_df.to_dict(orient="records")
+        record["career_history"] = hist_df.to_dict(orient="records")
+        record["facet_scores"] = {
+            "retrieval_systems": min(99, int(85 + record["score"] * 14)),
+            "vector_db_search": min(98, int(82 + record["score"] * 15)),
+            "python_engineering": min(95, int(80 + record["score"] * 15)),
+            "ranking_evaluation": min(96, int(84 + record["score"] * 13)),
+            "learning_to_rank": min(90, int(75 + record["score"] * 15)),
+            "llm_finetuning": min(85, int(70 + record["score"] * 15))
+        }
+        return record
+
+    # -------------------------------------------------------------
+    # DML: INSERT (Candidate Registration)
+    # -------------------------------------------------------------
+    def insert_candidate(self, data: dict):
+        t0 = time.perf_counter()
+        cid = data.get("candidate_id") or f"CAND_{int(time.time()) % 1000000:07d}"
+        name = data.get("name", "New Candidate")
+        headline = data.get("headline", "AI & Machine Learning Engineer")
+        title = data.get("current_title", "ML Engineer")
+        company = data.get("current_company", "Independent")
+        location = data.get("location", "Bengaluru, India")
+        yoe = float(data.get("total_exp_years", 4.0))
+        is_product = bool(data.get("is_product_co", True))
+        notice_days = int(data.get("notice_period_days", 15))
+
+        insert_cand_sql = """
+            INSERT INTO Candidate (candidate_id, name, headline, current_title, current_company, location, total_exp_years, is_product_co)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        self.con.execute(insert_cand_sql, [cid, name, headline, title, company, location, yoe, is_product])
+
+        insert_sig_sql = """
+            INSERT INTO RedrobSignals (candidate_id, notice_period_days, willing_to_relocate, github_activity_score, skill_multiplier)
+            VALUES (?, ?, TRUE, 0.90, ?)
+        """
+        skill_mult = 1.15 if is_product else 1.05
+        self.con.execute(insert_sig_sql, [cid, notice_days, skill_mult])
+
+        # Add initial rank entry
+        max_rank_row = self.con.execute("SELECT MAX(current_rank) AS max_r FROM RankingSubmission").df()
+        next_rank = int(max_rank_row["max_r"].iloc[0] or 100) + 1
+        initial_score = round(min(0.999, 0.70 + (yoe / 20.0) * 0.2), 4)
+        reasoning = f"New candidate profile registered: {yoe}y YoE in ML engineering at {company}, {notice_days}d notice."
+
+        insert_rank_sql = """
+            INSERT INTO RankingSubmission (candidate_id, current_rank, original_rank, rank_delta, score, original_score, reasoning)
+            VALUES (?, ?, ?, 0, ?, ?, ?)
+        """
+        self.con.execute(insert_rank_sql, [cid, next_rank, next_rank, initial_score, initial_score, reasoning])
+
+        # Skills & Career History
+        skills_list = data.get("skills") or ["Vector Indexing", "PyTorch", "Information Retrieval"]
+        for idx, sk in enumerate(skills_list):
+            sk_id = f"SK_{cid}_{idx}"
+            self.con.execute(
+                "INSERT INTO Skills (skill_id, candidate_id, skill_name, proficiency, assessment_score) VALUES (?, ?, ?, 'Advanced', 92.0)",
+                [sk_id, cid, sk]
+            )
+
+        hist_id = f"HIST_{cid}_1"
+        self.con.execute(
+            "INSERT INTO CareerHistory (history_id, candidate_id, company, title, duration_months, is_product) VALUES (?, ?, ?, ?, 36, ?)",
+            [hist_id, cid, company, title, is_product]
+        )
+
+        elapsed = (time.perf_counter() - t0) * 1000
+        full_sql = f"INSERT INTO Candidate VALUES ('{cid}', '{name}', ...); INSERT INTO RedrobSignals VALUES ('{cid}', {notice_days}, ...); INSERT INTO RankingSubmission VALUES ('{cid}', {next_rank}, ...); INSERT INTO Skills VALUES (...);"
+        self._log_sql(full_sql, "INSERT_DML", elapsed, 5)
+
+        return self.get_candidate_detail(cid)
+
+    # -------------------------------------------------------------
+    # DML: UPDATE (Candidate Profile Modification)
+    # -------------------------------------------------------------
+    def update_candidate(self, candidate_id: str, data: dict):
+        t0 = time.perf_counter()
+        
+        # 1. Update Candidate table
+        update_cand_parts = []
+        cand_params = []
+        if "name" in data:
+            update_cand_parts.append("name = ?")
+            cand_params.append(data["name"])
+        if "current_title" in data:
+            update_cand_parts.append("current_title = ?")
+            cand_params.append(data["current_title"])
+        if "current_company" in data:
+            update_cand_parts.append("current_company = ?")
+            cand_params.append(data["current_company"])
+        if "location" in data:
+            update_cand_parts.append("location = ?")
+            cand_params.append(data["location"])
+        if "total_exp_years" in data:
+            update_cand_parts.append("total_exp_years = ?")
+            cand_params.append(float(data["total_exp_years"]))
+        if "is_product_co" in data:
+            update_cand_parts.append("is_product_co = ?")
+            cand_params.append(bool(data["is_product_co"]))
+
+        if update_cand_parts:
+            cand_params.append(candidate_id)
+            sql_cand = f"UPDATE Candidate SET {', '.join(update_cand_parts)} WHERE candidate_id = ?"
+            self.con.execute(sql_cand, cand_params)
+
+        # 2. Update RedrobSignals table
+        update_sig_parts = []
+        sig_params = []
+        if "notice_period_days" in data:
+            update_sig_parts.append("notice_period_days = ?")
+            sig_params.append(int(data["notice_period_days"]))
+        if "willing_to_relocate" in data:
+            update_sig_parts.append("willing_to_relocate = ?")
+            sig_params.append(bool(data["willing_to_relocate"]))
+
+        if update_sig_parts:
+            sig_params.append(candidate_id)
+            sql_sig = f"UPDATE RedrobSignals SET {', '.join(update_sig_parts)} WHERE candidate_id = ?"
+            self.con.execute(sql_sig, sig_params)
+
+        elapsed = (time.perf_counter() - t0) * 1000
+        sql_log = f"UPDATE Candidate SET ... WHERE candidate_id = '{candidate_id}'; UPDATE RedrobSignals SET ... WHERE candidate_id = '{candidate_id}';"
+        self._log_sql(sql_log, "UPDATE_DML", elapsed, 1)
+
+        # Re-rank in-memory so leaderboard updates live!
+        self.rerank(
+            notice_sensitivity=self.current_weights["notice_sensitivity"],
+            product_bias=self.current_weights["product_bias"],
+            core_strictness=self.current_weights["core_strictness"]
+        )
+
+        return self.get_candidate_detail(candidate_id)
+
+    # -------------------------------------------------------------
+    # DML: DELETE (Withdraw Candidacy)
+    # -------------------------------------------------------------
+    def delete_candidate(self, candidate_id: str):
+        t0 = time.perf_counter()
+        
+        del_rank = "DELETE FROM RankingSubmission WHERE candidate_id = ?"
+        del_sig = "DELETE FROM RedrobSignals WHERE candidate_id = ?"
+        del_skills = "DELETE FROM Skills WHERE candidate_id = ?"
+        del_hist = "DELETE FROM CareerHistory WHERE candidate_id = ?"
+        del_cand = "DELETE FROM Candidate WHERE candidate_id = ?"
+
+        self.con.execute(del_rank, [candidate_id])
+        self.con.execute(del_sig, [candidate_id])
+        self.con.execute(del_skills, [candidate_id])
+        self.con.execute(del_hist, [candidate_id])
+        self.con.execute(del_cand, [candidate_id])
+
+        elapsed = (time.perf_counter() - t0) * 1000
+        full_sql = f"DELETE FROM RankingSubmission WHERE candidate_id = '{candidate_id}'; DELETE FROM Candidate WHERE candidate_id = '{candidate_id}';"
+        self._log_sql(full_sql, "DELETE_DML", elapsed, 5)
+
+        # Recompute ranks
+        self.rerank(
+            notice_sensitivity=self.current_weights["notice_sensitivity"],
+            product_bias=self.current_weights["product_bias"],
+            core_strictness=self.current_weights["core_strictness"]
+        )
+        return {"status": "deleted", "candidate_id": candidate_id}
+
+    # -------------------------------------------------------------
+    # RE-RANKING & CALCULATION
+    # -------------------------------------------------------------
     def rerank(self, notice_sensitivity: float, product_bias: float, core_strictness: float):
         t0 = time.perf_counter()
         self.current_weights = {
@@ -223,11 +477,25 @@ class CandidateEngine:
             "core_strictness": core_strictness
         }
 
-        scores = []
-        for _, row in self.candidates_df.iterrows():
-            base = row["original_score"]
+        # Pull all candidate ranking inputs
+        df = self.con.execute("""
+            SELECT 
+                c.candidate_id,
+                r.original_score,
+                r.original_rank,
+                s.notice_period_days,
+                c.is_product_co
+            FROM Candidate c
+            INNER JOIN RedrobSignals s ON c.candidate_id = s.candidate_id
+            INNER JOIN RankingSubmission r ON c.candidate_id = r.candidate_id
+        """).df()
 
-            np_days = row["notice_period_days"]
+        scores = []
+        for _, row in df.iterrows():
+            base = float(row["original_score"])
+            np_days = int(row["notice_period_days"])
+
+            # Notice factor
             if np_days <= 30:
                 notice_factor = 1.0 + (0.15 * notice_sensitivity)
             elif np_days <= 60:
@@ -237,53 +505,81 @@ class CandidateEngine:
             else:
                 notice_factor = 1.0 - (0.30 * notice_sensitivity)
 
-            prod_factor = 1.0
-            if row["is_product_co"]:
-                prod_factor = 1.0 + (0.20 * product_bias)
-            else:
-                prod_factor = 1.0 - (0.10 * product_bias)
+            # Product co factor
+            prod_factor = 1.0 + (0.20 * product_bias) if row["is_product_co"] else 1.0 - (0.10 * product_bias)
 
-            core_avg = np.mean([
-                row["facet_scores"].get("retrieval_systems", 90),
-                row["facet_scores"].get("vector_db_search", 90),
-                row["facet_scores"].get("python_engineering", 90),
-                row["facet_scores"].get("ranking_evaluation", 90)
-            ]) / 100.0
-            core_factor = (core_avg ** (1.0 + core_strictness * 0.5))
+            scores.append(base * notice_factor * prod_factor)
 
-            new_score = base * notice_factor * prod_factor * core_factor
-            scores.append(new_score)
+        df["new_score"] = scores
+        df = df.sort_values(by="new_score", ascending=False).reset_index(drop=True)
+        df["current_rank"] = np.arange(1, len(df) + 1)
+        max_s = df["new_score"].max()
+        df["score"] = (df["new_score"] / max_s).round(4) if max_s > 0 else df["new_score"].round(4)
+        df["rank_delta"] = df["original_rank"] - df["current_rank"]
 
-        self.candidates_df["dynamic_score"] = scores
-        self.candidates_df = self.candidates_df.sort_values(by="dynamic_score", ascending=False).reset_index(drop=True)
-        self.candidates_df["current_rank"] = np.arange(1, len(self.candidates_df) + 1)
-        self.candidates_df["score"] = self.candidates_df["dynamic_score"].round(4)
+        # Batch update back into DuckDB RankingSubmission table
+        updates = [(int(r["current_rank"]), int(r["rank_delta"]), float(r["score"]), str(r["candidate_id"])) for _, r in df.iterrows()]
+        self.con.executemany("""
+            UPDATE RankingSubmission 
+            SET current_rank = ?, rank_delta = ?, score = ?
+            WHERE candidate_id = ?
+        """, updates)
 
-        max_s = self.candidates_df["score"].max()
-        if max_s > 0:
-            self.candidates_df["score"] = (self.candidates_df["score"] / max_s).round(4)
+        elapsed = (time.perf_counter() - t0) * 1000
+        self._log_sql(
+            f"UPDATE RankingSubmission SET current_rank, rank_delta, score [Batch {len(updates)} rows];",
+            "RE_RANK_DML",
+            elapsed,
+            len(updates)
+        )
 
-        deltas = []
-        for _, row in self.candidates_df.iterrows():
-            cid = row["candidate_id"]
-            old_rank = self.baseline_ranks.get(cid, row["current_rank"])
-            new_rank = row["current_rank"]
-            delta = old_rank - new_rank
-            deltas.append(delta)
-        self.candidates_df["rank_delta"] = deltas
-
-        elapsed_ms = round((time.perf_counter() - t0) * 1000, 1)
         return {
             "status": "success",
-            "latency_ms": elapsed_ms,
+            "latency_ms": round(elapsed, 1),
             "weights": self.current_weights,
-            "candidates": self.candidates_df.to_dict(orient="records")
+            "candidates": self.get_candidates()
         }
 
-    def compare(self, candidate_ids: list):
-        if not candidate_ids:
-            return []
-        matches = self.candidates_df[self.candidates_df["candidate_id"].isin(candidate_ids)]
-        return matches.sort_values(by="current_rank").to_dict(orient="records")
+    # -------------------------------------------------------------
+    # CUSTOM SQL QUERY EXECUTION (For Professor Sandbox Terminal)
+    # -------------------------------------------------------------
+    def execute_custom_sql(self, query: str):
+        t0 = time.perf_counter()
+        q = query.strip()
+        try:
+            res_df = self.con.execute(q).df()
+            elapsed = (time.perf_counter() - t0) * 1000
+            
+            # Detect statement type
+            op_type = "CUSTOM_SELECT"
+            if q.upper().startswith("INSERT"): op_type = "CUSTOM_INSERT"
+            elif q.upper().startswith("UPDATE"): op_type = "CUSTOM_UPDATE"
+            elif q.upper().startswith("DELETE"): op_type = "CUSTOM_DELETE"
+            elif q.upper().startswith("CREATE"): op_type = "CUSTOM_DDL"
 
-engine = CandidateEngine()
+            self._log_sql(q, op_type, elapsed, len(res_df))
+
+            # Limit output to 100 rows for display safety
+            columns = list(res_df.columns)
+            rows = res_df.head(100).to_dict(orient="records")
+
+            return {
+                "success": True,
+                "columns": columns,
+                "rows": rows,
+                "total_rows": len(res_df),
+                "latency_ms": round(elapsed, 2)
+            }
+        except Exception as e:
+            elapsed = (time.perf_counter() - t0) * 1000
+            self._log_sql(q, "ERROR", elapsed, 0)
+            return {
+                "success": False,
+                "error": str(e),
+                "latency_ms": round(elapsed, 2)
+            }
+
+    def get_sql_logs(self):
+        return self.sql_transaction_logs
+
+relational_engine = RelationalCandidateEngine()

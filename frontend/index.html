@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="scroll-smooth" lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Assay — AI Candidate Ranking &amp; Talent Intelligence</title>
-  
+  <title>Assay — Talent Intelligence Platform • Liquid Light</title>
+
   <!-- Google Fonts: Libre Caslon Text & Hanken Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&amp;family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+
   <!-- Material Symbols Outlined -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-  
-  <!-- Tailwind CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind CSS with Forms & Container Queries -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
     tailwind.config = {
@@ -23,24 +23,35 @@
           colors: {
             "background": "#FAF9F7",
             "surface": "#F4F3F1",
-            "surface-dim": "#EFEEEC",
+            "surface-container": "#F4F3F1",
+            "surface-container-low": "#F8F7F5",
+            "surface-container-lowest": "#FFFFFF",
+            "surface-container-high": "#E8E7E4",
+            "surface-container-highest": "#E2E1DE",
             "blob-coral": "#FFB4A2",
-            "blob-coral-soft": "#FFD1D1",
             "blob-blue": "#A2D2FF",
-            "blob-blue-soft": "#D1E8FF",
             "blob-mint": "#B2F2BB",
-            "blob-mint-soft": "#E8FFD1",
+            "primary": "#000000",
+            "on-primary": "#FFFFFF",
+            "on-surface": "#1A1C1B",
             "text-primary": "#1A1C1B",
             "text-medium": "#5F5E5B",
-            "brand-black": "#000000"
+            "outline": "#7E7576",
+            "outline-variant": "#CFC4C5",
+            "error": "#BA1A1A"
           },
           fontFamily: {
-            serif: ['"Libre Caslon Text"', 'serif'],
-            sans: ['"Hanken Grotesk"', 'sans-serif']
+            "headline-lg": ["Libre Caslon Text", "serif"],
+            "headline-md": ["Libre Caslon Text", "serif"],
+            "body-lg": ["Hanken Grotesk", "sans-serif"],
+            "body-md": ["Hanken Grotesk", "sans-serif"],
+            "label-sm": ["Hanken Grotesk", "sans-serif"],
+            "mono": ["Consolas", "Monaco", "Courier New", "monospace"]
           },
           borderRadius: {
-            '3xl': '1.75rem',
-            '4xl': '2.25rem'
+            "3xl": "1.75rem",
+            "4xl": "2.25rem",
+            "full": "9999px"
           }
         }
       }
@@ -54,208 +65,925 @@
       font-family: 'Hanken Grotesk', sans-serif;
       overflow-x: hidden;
     }
-    .font-serif {
+    .font-headline {
       font-family: 'Libre Caslon Text', serif;
     }
-    /* Liquid Light Glass Tokens */
-    .glass-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.25) 100%);
+    
+    /* Liquid Light Organic Motion */
+    @keyframes liquidFloat {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(30px, -40px) scale(1.06); }
+      66% { transform: translate(-25px, 20px) scale(0.96); }
+    }
+    .liquid-blob-1 { animation: liquidFloat 24s ease-in-out infinite; }
+    .liquid-blob-2 { animation: liquidFloat 28s ease-in-out infinite reverse; }
+    .liquid-blob-3 { animation: liquidFloat 20s ease-in-out infinite 2s; }
+
+    /* Glass Tokens */
+    .glass-specular {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.40) 100%);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.70);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.80) 0%, rgba(255, 255, 255, 0.30) 100%);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.70);
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.04);
     }
     .glass-pill {
-      background: rgba(255, 255, 255, 0.80);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.70);
+      border: 1px solid rgba(255, 255, 255, 0.75);
     }
-    /* Ambient Liquid Pastel Blobs */
-    .ambient-blob {
-      position: fixed;
-      border-radius: 9999px;
-      filter: blur(80px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.60;
+    .glass-input {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
-    /* Custom Slider Styling */
+    .glass-input:focus {
+      background: rgba(255, 255, 255, 0.98);
+      border-color: #000000;
+    }
     input[type=range] {
       accent-color: #000000;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
     }
   </style>
 </head>
 
-<body class="min-h-screen relative selection:bg-black selection:text-white pb-24">
+<body class="bg-background text-on-surface min-h-screen relative overflow-x-hidden selection:bg-blob-coral selection:text-primary font-body-md antialiased pb-20">
 
-  <!-- Ambient Liquid Pastel Blobs -->
-  <div class="ambient-blob w-[500px] h-[500px] bg-blob-coral top-[-100px] left-[-100px]"></div>
-  <div class="ambient-blob w-[600px] h-[600px] bg-blob-blue top-[150px] right-[-150px]"></div>
-  <div class="ambient-blob w-[550px] h-[550px] bg-blob-mint bottom-[50px] left-[20%]"></div>
+  <!-- Ambient Organic Pastel Liquid Light Blobs in Canvas Background -->
+  <div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="liquid-blob-1 absolute -top-24 -left-20 w-[550px] h-[550px] rounded-full bg-blob-coral/35 blur-[120px] mix-blend-multiply"></div>
+    <div class="liquid-blob-2 absolute top-[28%] -right-24 w-[600px] h-[600px] rounded-full bg-blob-blue/40 blur-[130px] mix-blend-multiply"></div>
+    <div class="liquid-blob-3 absolute bottom-10 left-[20%] w-[500px] h-[500px] rounded-full bg-blob-mint/35 blur-[120px] mix-blend-multiply"></div>
+  </div>
 
   <!-- Primary Wrapper -->
-  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-6">
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
 
-    <!-- 1. Floating Suspended Header -->
-    <header class="glass-pill rounded-full px-6 py-3.5 mb-8 flex items-center justify-between shadow-sm">
-      <div class="flex items-center space-x-4">
-        <div class="w-9 h-9 bg-black rounded-full flex items-center justify-center text-white font-serif font-bold text-lg shadow-sm">
-          A
-        </div>
-        <div>
-          <span class="font-serif text-xl tracking-tight font-bold text-text-primary">Assay</span>
-          <span class="text-xs uppercase tracking-widest text-text-medium ml-2 font-medium">Talent Intelligence</span>
-        </div>
-        <div class="hidden md:flex items-center space-x-2 pl-4 border-l border-black/10">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="text-xs text-text-medium font-medium">Search &amp; ML Benchmark — 100K Pool</span>
-        </div>
-      </div>
-
-      <div class="flex items-center space-x-3">
-        <button id="btn-export-csv" class="glass-pill text-xs font-semibold px-4 py-2 rounded-full text-black hover:bg-white transition flex items-center space-x-1.5 shadow-sm">
-          <span class="material-symbols-outlined text-sm">download</span>
-          <span>Export CSV</span>
-        </button>
-        <button id="btn-run-pipeline" class="bg-black text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-black/85 transition flex items-center space-x-1.5 shadow-md">
-          <span class="material-symbols-outlined text-sm">play_arrow</span>
-          <span>Run Pipeline</span>
-        </button>
-      </div>
-    </header>
-
-    <!-- 2. Telemetry HUD Bar -->
-    <section class="glass-card rounded-3xl p-6 mb-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-      <div class="border-r border-black/5 last:border-0 pr-4">
-        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Total Pool</div>
-        <div class="font-serif text-3xl font-bold text-text-primary" id="tele-total">100,000</div>
-        <div class="text-xs text-text-medium mt-1">Initial indexed ingestion</div>
-      </div>
-      <div class="border-r border-black/5 last:border-0 pr-4">
-        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">SQL Survivors</div>
-        <div class="font-serif text-3xl font-bold text-text-primary" id="tele-survivors">24,812</div>
-        <div class="text-xs text-text-medium mt-1">Hard filter &amp; role pass</div>
-      </div>
-      <div class="border-r border-black/5 last:border-0 pr-4">
-        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Shortlisted</div>
-        <div class="font-serif text-3xl font-bold text-text-primary" id="tele-shortlisted">Top 100</div>
-        <div class="text-xs text-text-medium mt-1">Deterministic vector cohort</div>
-      </div>
-      <div>
-        <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Spammer Rate</div>
-        <div class="font-serif text-3xl font-bold text-emerald-700" id="tele-spammer">0.0%</div>
-        <div class="text-xs text-text-medium mt-1">Anti-gaming verified</div>
-      </div>
-    </section>
-
-    <!-- 3. Quick Tuning Strip -->
-    <section class="glass-card rounded-3xl p-6 mb-8">
-      <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-4 border-b border-black/5 gap-3">
-        <div>
-          <h2 class="font-serif text-lg font-bold text-text-primary">Interactive Sensitivity Sandbox</h2>
-          <p class="text-xs text-text-medium">Adjust candidate suitability weights for instant in-memory re-ranking (&lt;25ms latency).</p>
-        </div>
-        <div class="flex items-center space-x-2 text-xs text-text-medium">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span id="latency-indicator">Auto-Calibrated • Latency 18ms</span>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <div class="flex justify-between text-xs mb-1.5 font-medium">
-            <span class="text-text-primary">Notice Period Sensitivity</span>
-            <span class="text-text-medium" id="val-notice">Standard (30d)</span>
-          </div>
-          <input type="range" id="slider-notice" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
-          <div class="flex justify-between text-[10px] text-text-medium mt-1">
-            <span>Flexible</span>
-            <span>Immediate Joiners Only</span>
+    <!-- ================================================================= -->
+    <!-- VIEW 1: STITCH SCREEN 4 — ACCESS PORTAL (DUAL ROLE AUTH & REG)    -->
+    <!-- ================================================================= -->
+    <div id="view-login" class="flex flex-col min-h-[92vh] justify-between transition-all duration-300">
+      
+      <!-- Floating Frosted Glass Header (Stitch Screen 4) -->
+      <header class="flex items-center justify-between px-6 py-3 w-full rounded-full border border-white/60 bg-surface-container-lowest/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.04)] mb-8">
+        <div class="flex items-center gap-3">
+          <a class="flex items-center gap-2 group" href="#">
+            <span class="font-headline-md text-2xl tracking-tight text-primary font-normal">Assay</span>
+            <span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-primary/20"></span>
+            <span class="hidden sm:inline-block font-label-sm text-xs text-text-medium tracking-normal">Talent Intelligence Platform</span>
+          </a>
+          <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container/70 border border-white/80 text-text-medium font-label-sm text-xs backdrop-blur-md">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span>Relational DB Edition • DuckDB 3NF</span>
           </div>
         </div>
 
-        <div>
-          <div class="flex justify-between text-xs mb-1.5 font-medium">
-            <span class="text-text-primary">Product Co. Pedigree Bias</span>
-            <span class="text-text-medium" id="val-product">High Affinity</span>
+        <nav class="hidden md:flex items-center gap-6 text-sm text-text-medium">
+          <a class="hover:text-primary transition-colors cursor-pointer" onclick="quickLoginRecruiter()">Leaderboard</a>
+          <a class="hover:text-primary transition-colors" href="#candidate-registration">Candidate Enrollment</a>
+          <a class="hover:text-primary transition-colors cursor-pointer" onclick="toggleSqlDrawer(true)">SQL Evaluation Terminal</a>
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <button class="px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-xs hover:opacity-90 active:scale-[0.98] transition-all shadow-sm" onclick="quickLoginRecruiter()">
+            Launch Recruiter Cockpit →
+          </button>
+        </div>
+      </header>
+
+      <!-- Hero Section (Stitch Screen 4) -->
+      <section class="pt-4 pb-8 text-center max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.03)] backdrop-blur-xl mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          <span class="font-label-sm text-xs tracking-wide text-on-surface">Deterministic Access Gateway • ANSI SQL Calibrated</span>
+        </div>
+        <h1 class="font-headline-lg text-4xl sm:text-[46px] sm:leading-[54px] tracking-tight text-primary font-normal mb-4">
+          The Architecture of Talent Intelligence
+        </h1>
+        <p class="font-body-lg text-base text-text-medium max-w-2xl mx-auto leading-relaxed">
+          Choose your access credential to interrogate rankings or manage candidate credentials across normalized vector indices.
+        </p>
+      </section>
+
+      <!-- Dual-Role Authentication Cards (Stitch Screen 4) -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 items-stretch" id="auth-cards">
+        
+        <!-- Card 1: Recruiter Command -->
+        <div class="relative rounded-3xl glass-specular p-8 border border-white/70 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-2xl flex flex-col justify-between transition-all hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)]">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2 text-text-medium">
+                <span class="material-symbols-outlined text-[20px]">terminal</span>
+                <span class="font-label-sm text-xs tracking-wider uppercase font-semibold">Auth Class 01</span>
+              </div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container border border-white/80 font-label-sm text-xs text-primary font-medium">
+                Full Query Privileges
+              </span>
+            </div>
+            <h2 class="font-headline-md text-2xl text-primary font-normal mb-2">
+              Recruiter Command
+            </h2>
+            <p class="font-body-md text-sm text-text-medium mb-6">
+              For hiring managers, talent architects, and algorithmic calibration teams.
+            </p>
+
+            <form class="space-y-4" onsubmit="event.preventDefault(); submitLogin('recruiter');">
+              <div>
+                <label class="block font-label-sm text-xs text-on-surface mb-1.5 font-medium" for="recruiter-email">Work Email Address</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                    <span class="material-symbols-outlined text-[18px]">alternate_email</span>
+                  </span>
+                  <input class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface placeholder:text-outline font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="recruiter-email" placeholder="recruiter@assay.ai" type="email" value="eleanor.vane@assay.ai"/>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="block font-label-sm text-xs text-on-surface font-medium" for="recruiter-passkey">Security Token / 2FA Passkey</label>
+                  <span class="font-label-sm text-xs text-text-medium">Hardware ready</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                    <span class="material-symbols-outlined text-[18px]">key</span>
+                  </span>
+                  <input class="glass-input w-full pl-10 pr-10 py-2.5 rounded-full border border-white/70 text-on-surface placeholder:text-outline font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="recruiter-passkey" placeholder="Enter hardware token or passkey" type="password" value="••••••••••••••••"/>
+                </div>
+              </div>
+
+              <button id="btn-login-recruiter" class="w-full mt-2 py-3 px-6 rounded-full bg-primary text-on-primary font-body-md text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all shadow-sm" type="submit">
+                <span>Sign In as Recruiter</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </form>
+
+            <div class="mt-3">
+              <button onclick="quickLoginRecruiter()" class="w-full py-2.5 px-6 rounded-full bg-surface-container-lowest/60 border border-white/80 hover:bg-white text-on-surface font-label-sm text-xs flex items-center justify-center gap-2 transition-all shadow-xs" type="button">
+                <span class="material-symbols-outlined text-[16px] text-amber-600">bolt</span>
+                <span>One-Click Recruiter Demo Access</span>
+              </button>
+            </div>
           </div>
-          <input type="range" id="slider-product" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
-          <div class="flex justify-between text-[10px] text-text-medium mt-1">
-            <span>Neutral</span>
-            <span>+25% Product Co. Boost</span>
+
+          <div class="mt-8 pt-4 border-t border-white/60 flex items-center gap-2 text-text-medium font-label-sm text-xs">
+            <span class="material-symbols-outlined text-[16px] text-primary/70">verified_user</span>
+            <span>Access to candidate leaderboard, sensitivity tuning &amp; deep dossiers.</span>
           </div>
         </div>
 
-        <div>
-          <div class="flex justify-between text-xs mb-1.5 font-medium">
-            <span class="text-text-primary">Core Retrieval Strictness</span>
-            <span class="text-text-medium" id="val-core">0.85 Threshold</span>
+        <!-- Card 2: Candidate Portal -->
+        <div class="relative rounded-3xl glass-specular p-8 border border-white/70 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-2xl flex flex-col justify-between transition-all hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)]">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2 text-text-medium">
+                <span class="material-symbols-outlined text-[20px]">badge</span>
+                <span class="font-label-sm text-xs tracking-wider uppercase font-semibold">Auth Class 02</span>
+              </div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container border border-white/80 font-label-sm text-xs text-primary font-medium">
+                Self-Service Dossier
+              </span>
+            </div>
+            <h2 class="font-headline-md text-2xl text-primary font-normal mb-2">
+              Candidate Portal
+            </h2>
+            <p class="font-body-md text-sm text-text-medium mb-6">
+              For engineers and specialists interrogating match scores and updating verified signals.
+            </p>
+
+            <form class="space-y-4" onsubmit="event.preventDefault(); submitLogin('candidate');">
+              <div>
+                <label class="block font-label-sm text-xs text-on-surface mb-1.5 font-medium" for="login-candidate-select">Select Candidate Profile</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                    <span class="material-symbols-outlined text-[18px]">fingerprint</span>
+                  </span>
+                  <select id="login-candidate-select" class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-pointer">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="block font-label-sm text-xs text-on-surface font-medium" for="candidate-passkey">Candidate Passkey (WebAuthn)</label>
+                  <span class="font-label-sm text-xs text-emerald-700 font-medium">Biometric ready</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                    <span class="material-symbols-outlined text-[18px]">lock</span>
+                  </span>
+                  <input class="glass-input w-full pl-10 pr-10 py-2.5 rounded-full border border-white/70 text-on-surface placeholder:text-outline font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="candidate-passkey" placeholder="Touch ID or FIDO2 Security Token" type="password" value="demo_key_fido2"/>
+                </div>
+              </div>
+
+              <button id="btn-login-candidate" class="w-full mt-2 py-3 px-6 rounded-full bg-primary text-on-primary font-body-md text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all shadow-sm" type="submit">
+                <span>Sign In as Candidate</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </form>
+
+            <div class="mt-3">
+              <a class="w-full py-2.5 px-6 rounded-full bg-surface-container-lowest/60 border border-white/80 hover:bg-white text-on-surface font-label-sm text-xs flex items-center justify-center gap-2 transition-all shadow-xs" href="#candidate-registration">
+                <span class="material-symbols-outlined text-[16px]">person_add</span>
+                <span>Register New Candidate (CRUD INSERT)</span>
+              </a>
+            </div>
           </div>
-          <input type="range" id="slider-core" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
-          <div class="flex justify-between text-[10px] text-text-medium mt-1">
-            <span>Balanced</span>
-            <span>Geometric Mean Strict</span>
+
+          <div class="mt-8 pt-4 border-t border-white/60 flex items-center gap-2 text-text-medium font-label-sm text-xs">
+            <span class="material-symbols-outlined text-[16px] text-primary/70">schema</span>
+            <span>Verifiable career trajectory, GitHub commits verification &amp; notice status.</span>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- 4. Main Candidate Leaderboard Table -->
-    <section class="glass-card rounded-3xl p-6 shadow-sm">
-      <div class="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-5 border-b border-black/5 gap-4">
-        <div>
-          <h2 class="font-serif text-2xl font-bold text-text-primary">Ranked Candidate Feed</h2>
-          <p class="text-xs text-text-medium">Showing top evaluated Search &amp; Recommendation Engineers with 100% deterministic explainability.</p>
+      </section>
+
+      <!-- New Candidate Registration Section (Stitch Screen 4) -->
+      <section class="scroll-mt-28 rounded-3xl glass-specular p-8 border border-white/70 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-2xl mb-12" id="candidate-registration">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-white/60 mb-8">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container border border-white/80 font-label-sm text-xs text-text-medium mb-2.5">
+              <span class="material-symbols-outlined text-[14px]">database</span>
+              <span>Schema Entity: public.Candidate &amp; RedrobSignals</span>
+            </div>
+            <h2 class="font-headline-md text-2xl text-primary font-normal">
+              New Candidate Registration
+            </h2>
+            <p class="font-body-md text-sm text-text-medium mt-1">
+              Direct DML INSERT into normalized candidate entity tables with multi-vector indexing.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-label-sm text-xs text-text-medium">Write Mode:</span>
+            <span class="px-3 py-1 rounded-full bg-surface-container-lowest border border-white/80 font-label-sm text-xs font-medium text-primary">
+              Strict 3NF Normalization
+            </span>
+          </div>
         </div>
 
-        <!-- Inline Filters -->
+        <form class="space-y-6" id="registration-form" onsubmit="event.preventDefault(); submitCandidateRegistration();">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <label class="block font-label-sm text-xs text-on-surface mb-2 font-medium" for="reg-name">Full Legal Name</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                  <span class="material-symbols-outlined text-[18px]">person</span>
+                </span>
+                <input class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="reg-name" required placeholder="e.g. Vikram Malhotra" type="text" value="Vikram Malhotra"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-label-sm text-xs text-on-surface mb-2 font-medium" for="reg-role">Target Role</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                  <span class="material-symbols-outlined text-[18px]">psychology</span>
+                </span>
+                <input class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="reg-role" required placeholder="Lead AI Search Engineer" type="text" value="Lead AI Search Engineer"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-label-sm text-xs text-on-surface mb-2 font-medium" for="reg-company">Current Organization / Co.</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                  <span class="material-symbols-outlined text-[18px]">corporate_fare</span>
+                </span>
+                <input class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="reg-company" required placeholder="e.g. Razorpay, CRED" type="text" value="Razorpay"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-label-sm text-xs text-on-surface mb-2 font-medium" for="reg-skills">Primary Competencies / Skills</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                  <span class="material-symbols-outlined text-[18px]">code</span>
+                </span>
+                <input class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="reg-skills" placeholder="Vector Indexing, PyTorch, FAISS" type="text" value="Vector Indexing, Triton, PyTorch"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-label-sm text-xs text-on-surface mb-2 font-medium" for="reg-loc">Base Location</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                  <span class="material-symbols-outlined text-[18px]">location_on</span>
+                </span>
+                <input class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="reg-loc" required placeholder="Bengaluru" type="text" value="Bengaluru"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-label-sm text-xs text-on-surface mb-2 font-medium" for="reg-yoe">Total Experience (Years)</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                  <span class="material-symbols-outlined text-[18px]">history_edu</span>
+                </span>
+                <input class="glass-input w-full pl-10 pr-4 py-2.5 rounded-full border border-white/70 text-on-surface font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="reg-yoe" required step="0.5" type="number" value="7.5"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notice Period Selector Pills -->
+          <div class="pt-2">
+            <label class="block font-label-sm text-xs text-on-surface mb-2 font-medium">Notice Period Availability</label>
+            <div class="flex flex-wrap items-center gap-2" id="reg-notice-pills">
+              <button class="reg-notice-pill active px-4 py-2 rounded-full bg-primary text-on-primary font-body-md text-xs transition" data-days="0" type="button">Immediate</button>
+              <button class="reg-notice-pill px-4 py-2 rounded-full bg-surface-container-lowest border border-white/80 text-on-surface font-body-md text-xs hover:bg-white transition" data-days="15" type="button">15 Days</button>
+              <button class="reg-notice-pill px-4 py-2 rounded-full bg-surface-container-lowest border border-white/80 text-on-surface font-body-md text-xs hover:bg-white transition" data-days="30" type="button">30 Days</button>
+              <button class="reg-notice-pill px-4 py-2 rounded-full bg-surface-container-lowest border border-white/80 text-on-surface font-body-md text-xs hover:bg-white transition" data-days="60" type="button">60 Days</button>
+            </div>
+            <input type="hidden" id="reg-notice-val" value="0"/>
+          </div>
+
+          <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/60">
+            <span class="inline-flex items-center gap-1.5 font-label-sm text-xs text-text-medium">
+              <span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+              <span>Instant cryptographic timestamp &amp; multi-table ACID transaction.</span>
+            </span>
+            <button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-on-primary font-body-md text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-md" type="submit">
+              <span>Submit Registration (DML INSERT)</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Minimal Editorial Glass Footer -->
+      <footer class="pt-6 pb-4 border-t border-black/5 flex flex-col md:flex-row items-center justify-between text-xs text-text-medium gap-4">
         <div class="flex flex-wrap items-center gap-2">
-          <div class="relative">
-            <input type="text" id="search-input" placeholder="Search by name, company, skill..." class="glass-pill text-xs rounded-full pl-8 pr-4 py-2 border border-black/10 text-text-primary placeholder:text-text-medium/60 focus:outline-none focus:ring-1 focus:ring-black w-60">
-            <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-xs text-text-medium">search</span>
-          </div>
-          <button id="chip-filter-all" class="filter-chip active bg-black text-white text-xs px-3.5 py-1.5 rounded-full font-medium transition">All Ranks</button>
-          <button id="chip-filter-product" class="filter-chip glass-pill text-black text-xs px-3.5 py-1.5 rounded-full font-medium hover:bg-white transition">Product Co.</button>
-          <button id="chip-filter-notice" class="filter-chip glass-pill text-black text-xs px-3.5 py-1.5 rounded-full font-medium hover:bg-white transition">&le; 30d Notice</button>
+          <span class="px-3 py-1 rounded-full glass-pill">DuckDB 3NF Relational Store</span>
+          <span class="px-3 py-1 rounded-full glass-pill">Session Isolation Active</span>
+          <span class="px-3 py-1 rounded-full glass-pill">ANSI SQL-Compliant Authentication</span>
         </div>
-      </div>
+        <div>
+          <span>© 2026 Assay Intelligence Inc. • Liquid Light Editorial Talent Engine</span>
+        </div>
+      </footer>
 
-      <!-- Candidate Table Grid -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead>
-            <tr class="text-[11px] uppercase tracking-wider text-text-medium border-b border-black/5">
-              <th class="py-3 px-3 w-12 font-medium">Select</th>
-              <th class="py-3 px-3 w-16 font-medium">Rank</th>
-              <th class="py-3 px-4 font-medium">Candidate &amp; Role</th>
-              <th class="py-3 px-3 font-medium">Score</th>
-              <th class="py-3 px-3 font-medium">Experience</th>
-              <th class="py-3 px-3 font-medium">Notice</th>
-              <th class="py-3 px-4 font-medium">Deterministic Recruiter Reasoning</th>
-              <th class="py-3 px-3 text-right font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody id="candidate-table-body" class="divide-y divide-black/5">
-            <!-- Dynamic rows populated by app.js -->
-          </tbody>
-        </table>
-      </div>
+    </div>
 
-      <!-- Footer Pagination / Status -->
-      <div class="mt-6 pt-4 border-t border-black/5 flex items-center justify-between text-xs text-text-medium">
-        <span id="footer-count">Showing 100 of 100 Shortlisted Candidates</span>
-        <span>Powered by Assay Hybrid DuckDB + Vector Search</span>
-      </div>
-    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 2: STITCH SCREEN 1 — RECRUITER COCKPIT & LEADERBOARD         -->
+    <!-- ================================================================= -->
+    <div id="view-recruiter" class="hidden transition-all duration-300">
+
+      <!-- Floating Header (Stitch Screen 1) -->
+      <header class="sticky top-4 z-40 flex items-center justify-between px-6 py-3 w-full rounded-full border border-white/60 bg-surface-container-lowest/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.04)] mb-8">
+        <div class="flex items-center gap-4">
+          <a class="flex items-center gap-2" href="#">
+            <span class="font-headline-md text-2xl tracking-tight text-primary font-normal">Assay</span>
+            <span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-primary/20"></span>
+            <span class="hidden sm:inline-block font-label-sm text-xs text-text-medium uppercase tracking-wider">Recruiter Cockpit</span>
+          </a>
+          <div class="hidden md:flex items-center gap-2 pl-4 border-l border-black/10">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-xs text-text-medium">Logged in: <strong class="text-black" id="recruiter-name-badge">Eleanor Vane</strong></span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-export-csv" class="glass-pill text-xs font-semibold px-4 py-2 rounded-full text-black hover:bg-white transition flex items-center gap-1.5 shadow-xs">
+            <span class="material-symbols-outlined text-sm">download</span>
+            <span>Export CSV</span>
+          </button>
+          <button id="btn-run-pipeline" class="bg-black text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-black/85 transition flex items-center gap-1.5 shadow-md">
+            <span class="material-symbols-outlined text-sm">play_arrow</span>
+            <span>Run Pipeline</span>
+          </button>
+          <button class="btn-logout glass-pill text-xs font-semibold px-4 py-2 rounded-full text-red-600 hover:bg-white transition flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">logout</span>
+            <span>Log Out</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Telemetry HUD (Stitch Screen 1) -->
+      <section class="glass-specular rounded-3xl p-6 mb-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="border-r border-black/5 last:border-0 pr-4">
+          <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Total Pool</div>
+          <div class="font-headline text-3xl font-bold text-text-primary" id="tele-total">100,000</div>
+          <div class="text-xs text-text-medium mt-1">Initial indexed ingestion</div>
+        </div>
+        <div class="border-r border-black/5 last:border-0 pr-4">
+          <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">SQL Survivors</div>
+          <div class="font-headline text-3xl font-bold text-text-primary" id="tele-survivors">27,620</div>
+          <div class="text-xs text-text-medium mt-1">Hard filter &amp; role pass</div>
+        </div>
+        <div class="border-r border-black/5 last:border-0 pr-4">
+          <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Shortlisted</div>
+          <div class="font-headline text-3xl font-bold text-text-primary" id="tele-shortlisted">Top 100</div>
+          <div class="text-xs text-text-medium mt-1">Calibrated vector cohort</div>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-text-medium font-medium mb-1">Spammer Rate</div>
+          <div class="font-headline text-3xl font-bold text-emerald-700" id="tele-spammer">0.0%</div>
+          <div class="text-xs text-text-medium mt-1">Anti-gaming verified</div>
+        </div>
+      </section>
+
+      <!-- Database Views & Source Selector (Academic Requirement: Database Views) -->
+      <section class="glass-specular rounded-3xl p-5 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center space-x-2">
+            <span class="material-symbols-outlined text-text-medium text-lg">schema</span>
+            <span class="text-xs uppercase tracking-widest font-bold text-text-primary">Database Query Source:</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="view-btn active bg-black text-white text-xs px-4 py-2 rounded-full font-medium transition" data-view="">
+              Table: Candidate (Full Joined Feed)
+            </button>
+            <button class="view-btn glass-pill text-black text-xs px-4 py-2 rounded-full font-medium hover:bg-white transition" data-view="v_immediate_product_engineers">
+              View: v_immediate_product_engineers (&le;30d)
+            </button>
+            <button class="view-btn glass-pill text-black text-xs px-4 py-2 rounded-full font-medium hover:bg-white transition" data-view="v_verified_search_specialists">
+              View: v_verified_search_specialists (&ge;92 Score)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Tuning Strip (Stitch Screen 1) -->
+      <section class="glass-specular rounded-3xl p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-4 border-b border-black/5 gap-3">
+          <div>
+            <h2 class="font-headline text-lg font-bold text-text-primary">Interactive Sensitivity Sandbox</h2>
+            <p class="text-xs text-text-medium">Adjust candidate suitability weights for instant in-memory re-ranking (&lt;25ms latency).</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs text-text-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="latency-indicator">Auto-Calibrated • Latency 18ms</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <div class="flex justify-between text-xs mb-1.5 font-medium">
+              <span class="text-text-primary">Notice Period Sensitivity</span>
+              <span class="text-text-medium" id="val-notice">Standard (30d)</span>
+            </div>
+            <input type="range" id="slider-notice" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1.5 font-medium">
+              <span class="text-text-primary">Product Co. Pedigree Bias</span>
+              <span class="text-text-medium" id="val-product">High Affinity</span>
+            </div>
+            <input type="range" id="slider-product" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1.5 font-medium">
+              <span class="text-text-primary">Core Retrieval Strictness</span>
+              <span class="text-text-medium" id="val-core">0.85 Threshold</span>
+            </div>
+            <input type="range" id="slider-core" min="0" max="1" step="0.1" value="0.5" class="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer">
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Candidate Leaderboard Table (Stitch Screen 1) -->
+      <section class="glass-specular rounded-3xl p-6 shadow-sm mb-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-5 border-b border-black/5 gap-4">
+          <div>
+            <h2 class="font-headline text-2xl font-bold text-text-primary">Ranked Candidate Feed</h2>
+            <p class="text-xs text-text-medium">Multi-table joined results from Candidate, RedrobSignals &amp; RankingSubmission.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative">
+              <input type="text" id="search-input" placeholder="Search by name, company..." class="glass-pill text-xs rounded-full pl-8 pr-4 py-2 border border-black/10 text-text-primary focus:outline-none focus:ring-1 focus:ring-black w-60">
+              <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-xs text-text-medium">search</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="text-[11px] uppercase tracking-wider text-text-medium border-b border-black/5">
+                <th class="py-3 px-3 w-12 font-medium">Select</th>
+                <th class="py-3 px-3 w-16 font-medium">Rank</th>
+                <th class="py-3 px-4 font-medium">Candidate &amp; Role</th>
+                <th class="py-3 px-3 font-medium">Score</th>
+                <th class="py-3 px-3 font-medium">YoE</th>
+                <th class="py-3 px-3 font-medium">Notice</th>
+                <th class="py-3 px-4 font-medium">Deterministic Recruiter Reasoning</th>
+                <th class="py-3 px-3 text-right font-medium">Action</th>
+              </tr>
+            </thead>
+            <tbody id="candidate-table-body" class="divide-y divide-black/5">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+
+    <!-- ================================================================= -->
+    <!-- VIEW 3: STITCH SCREEN 5 — CANDIDATE SELF-SERVICE PORTAL           -->
+    <!-- ================================================================= -->
+    <div id="view-candidate" class="hidden transition-all duration-300">
+
+      <!-- Floating Header (Stitch Screen 5) -->
+      <header class="sticky top-4 z-40 flex items-center justify-between px-6 py-3 w-full rounded-full border border-white/60 bg-surface-container-lowest/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] mb-8">
+        <div class="flex items-center gap-4">
+          <span class="font-headline-md text-2xl tracking-tight text-primary font-normal">Assay</span>
+          <div class="h-4 w-px bg-outline-variant/50 hidden sm:block"></div>
+          <div class="flex items-center gap-2">
+            <span class="text-text-medium font-body-md text-sm hidden sm:inline">Candidate Dossier —</span>
+            <span class="font-body-md text-sm text-primary font-medium" id="cand-header-name">Marcus Vance</span>
+            <span class="font-label-sm text-xs text-text-medium bg-surface-container/80 px-2.5 py-0.5 rounded-full border border-white/70" id="cand-header-id">cand_001</span>
+          </div>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest/90 border border-white/70 shadow-xs">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="font-label-sm text-xs text-on-surface-variant font-medium">Verified Candidate • 3NF Store Synchronized</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button class="btn-logout flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-lowest/90 hover:bg-surface-container-low text-primary border border-white/70 shadow-xs transition-all duration-200 active:scale-[0.98]">
+            <span class="font-label-sm text-xs font-medium">Sign Out / Switch Account</span>
+            <span class="material-symbols-outlined text-sm">logout</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Hero Section & 5 Metric Cards (Stitch Screen 5) -->
+      <section class="flex flex-col gap-4 mb-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container/70 border border-white/60 mb-2 backdrop-blur-md">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              <span class="font-label-sm text-xs text-text-medium">Relational Talent Record • Self-Governance Console</span>
+            </div>
+            <h1 class="font-headline-lg text-3xl sm:text-4xl text-primary tracking-normal">Your Candidate Dossier &amp; Signals</h1>
+            <p class="font-body-lg text-sm text-text-medium mt-1 max-w-2xl">
+              Interrogate your verified talent vectors, update career trajectory, or manage submission status within the deterministic relational evaluation layer.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-text-medium bg-surface-container-lowest/60 px-4 py-2 rounded-full border border-white/60 backdrop-blur-md self-start md:self-auto">
+            <span class="material-symbols-outlined text-blob-blue text-lg">verified_user</span>
+            <span class="font-label-sm text-xs">Cryptographically Signed Vector #882b</span>
+          </div>
+        </div>
+
+        <!-- 5 Status Metric Glass Cards Row (Stitch Screen 5) -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-2">
+          <!-- Card 1: Current Rank -->
+          <div class="col-span-2 md:col-span-1 rounded-3xl glass-specular p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-xs text-text-medium font-medium">Current Rank</span>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blob-mint/30 text-primary font-label-sm text-[11px] border border-blob-mint/40">
+                <span class="material-symbols-outlined text-[13px]">military_tech</span> Leader
+              </span>
+            </div>
+            <div class="mt-4">
+              <div class="font-headline text-2xl text-primary" id="cand-metric-rank">#1 <span class="text-xs text-text-medium font-normal">of 100</span></div>
+              <p class="font-label-sm text-[11px] text-text-medium mt-1">99.5th percentile cohort</p>
+            </div>
+          </div>
+
+          <!-- Card 2: Overall Match -->
+          <div class="rounded-3xl glass-specular p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-xs text-text-medium font-medium">Overall Match</span>
+              <span class="material-symbols-outlined text-text-medium text-sm">auto_awesome</span>
+            </div>
+            <div class="mt-4">
+              <div class="font-headline text-2xl text-primary" id="cand-metric-score">94.2%</div>
+              <p class="font-label-sm text-[11px] text-emerald-700 font-medium mt-1 flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">trending_up</span> Top Tier Fit
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 3: Semantic Match -->
+          <div class="rounded-3xl glass-specular p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-xs text-text-medium font-medium">Semantic Match</span>
+              <span class="material-symbols-outlined text-text-medium text-sm">psychology</span>
+            </div>
+            <div class="mt-4">
+              <div class="font-headline text-2xl text-primary" id="cand-metric-semantic">92.5%</div>
+              <p class="font-label-sm text-[11px] text-text-medium mt-1">Cosine distance 0.075</p>
+            </div>
+          </div>
+
+          <!-- Card 4: GitHub Signal -->
+          <div class="rounded-3xl glass-specular p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-xs text-text-medium font-medium">GitHub Signal</span>
+              <span class="material-symbols-outlined text-text-medium text-sm">code</span>
+            </div>
+            <div class="mt-4">
+              <div class="font-headline text-2xl text-primary" id="cand-metric-github">96.8%</div>
+              <p class="font-label-sm text-[11px] text-text-medium mt-1">1,420 commits evaluated</p>
+            </div>
+          </div>
+
+          <!-- Card 5: Notice Period -->
+          <div class="col-span-2 md:col-span-1 rounded-3xl glass-specular p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-xs text-text-medium font-medium">Notice Period</span>
+              <span class="material-symbols-outlined text-text-medium text-sm">schedule</span>
+            </div>
+            <div class="mt-4">
+              <div class="font-headline text-2xl text-primary" id="cand-metric-notice">Immediate</div>
+              <p class="font-label-sm text-[11px] text-text-medium mt-1">Ready for deployment</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Workspace Grid: Two Frosted Glass Cards (Stitch Screen 5) -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        
+        <!-- CARD A: Update Career Trajectory & Preferences (CRUD DML: UPDATE) -->
+        <article class="lg:col-span-8 rounded-3xl glass-specular p-8 flex flex-col justify-between gap-6">
+          <div class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-black/5">
+              <div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-xs mb-2 border border-white/60">
+                  <span class="material-symbols-outlined text-[14px]">edit_note</span>
+                  <span id="update-entity-badge">Relational Update Interface • Entity cand_001</span>
+                </div>
+                <h2 class="font-headline text-2xl text-primary">Update Career Trajectory &amp; Preferences</h2>
+              </div>
+              <span class="font-label-sm text-xs text-text-medium px-3 py-1 rounded-full bg-surface-container/60 border border-white/60">
+                CRUD DML: UPDATE
+              </span>
+            </div>
+
+            <!-- Target Notice Period Selector Pills -->
+            <div class="space-y-2">
+              <label class="block font-label-sm text-xs font-medium text-text-medium">
+                Target Notice Period / Availability State
+              </label>
+              <div class="flex flex-wrap items-center gap-2" id="cand-edit-notice-pills">
+                <button class="cand-notice-pill active px-5 py-2 rounded-full bg-primary text-on-primary font-body-md text-sm shadow-xs transition" data-days="0" type="button">Immediate</button>
+                <button class="cand-notice-pill px-5 py-2 rounded-full bg-surface-container-lowest/80 text-on-surface hover:bg-surface-container border border-white/80 font-body-md text-sm transition" data-days="15" type="button">15 Days</button>
+                <button class="cand-notice-pill px-5 py-2 rounded-full bg-surface-container-lowest/80 text-on-surface hover:bg-surface-container border border-white/80 font-body-md text-sm transition" data-days="30" type="button">30 Days</button>
+                <button class="cand-notice-pill px-5 py-2 rounded-full bg-surface-container-lowest/80 text-on-surface hover:bg-surface-container border border-white/80 font-body-md text-sm transition" data-days="60" type="button">60 Days</button>
+              </div>
+              <input type="hidden" id="cand-edit-notice-val" value="0"/>
+            </div>
+
+            <!-- Form Fields -->
+            <form id="form-update-candidate" class="space-y-4" onsubmit="event.preventDefault(); submitCandidateUpdate();">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <label class="block font-label-sm text-xs font-medium text-text-medium" for="edit-title">Current Professional Title</label>
+                  <div class="relative">
+                    <input class="glass-input w-full px-4 py-2.5 rounded-2xl border border-white/80 focus:border-primary focus:ring-0 text-primary font-body-md text-sm transition" id="edit-title" type="text" value="Lead AI Search Engineer"/>
+                    <span class="material-symbols-outlined absolute right-3.5 top-2.5 text-text-medium/60 pointer-events-none text-base">badge</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="block font-label-sm text-xs font-medium text-text-medium" for="edit-company">Current Organization / Affiliation</label>
+                  <div class="relative">
+                    <input class="glass-input w-full px-4 py-2.5 rounded-2xl border border-white/80 focus:border-primary focus:ring-0 text-primary font-body-md text-sm transition" id="edit-company" type="text" value="Sarvam AI"/>
+                    <span class="material-symbols-outlined absolute right-3.5 top-2.5 text-text-medium/60 pointer-events-none text-base">corporate_fare</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="block font-label-sm text-xs font-medium text-text-medium" for="edit-location">Base Location</label>
+                  <div class="relative">
+                    <input class="glass-input w-full px-4 py-2.5 rounded-2xl border border-white/80 focus:border-primary focus:ring-0 text-primary font-body-md text-sm transition" id="edit-location" type="text" value="Bengaluru"/>
+                    <span class="material-symbols-outlined absolute right-3.5 top-2.5 text-text-medium/60 pointer-events-none text-base">location_on</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="block font-label-sm text-xs font-medium text-text-medium" for="edit-yoe">Total Experience (Years)</label>
+                  <div class="relative">
+                    <input class="glass-input w-full px-4 py-2.5 rounded-2xl border border-white/80 focus:border-primary focus:ring-0 text-primary font-body-md text-sm transition" id="edit-yoe" step="0.5" type="number" value="8.0"/>
+                    <span class="material-symbols-outlined absolute right-3.5 top-2.5 text-text-medium/60 pointer-events-none text-base">history_edu</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Primary Skills Tag Chips -->
+              <div class="space-y-2 pt-2">
+                <div class="flex items-center justify-between">
+                  <label class="block font-label-sm text-xs font-medium text-text-medium">Verified Primary Skills &amp; Kernel Vectors</label>
+                  <span class="font-label-sm text-[11px] text-text-medium">Synced with Skills entity table</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-surface-container-lowest/60 border border-white/70 flex flex-wrap items-center gap-2" id="cand-skills-chips">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Live SQL Preview Box (Stitch Screen 5) -->
+              <div class="space-y-2 pt-2">
+                <div class="flex items-center justify-between">
+                  <span class="font-label-sm text-xs font-medium text-text-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[15px]">terminal</span>
+                    <span>DuckDB Dynamic Query Synthesis (DML Preview)</span>
+                  </span>
+                  <span class="font-label-sm text-xs text-emerald-700 bg-blob-mint/30 px-2 py-0.5 rounded-full font-medium">Valid Relational AST</span>
+                </div>
+                <div class="rounded-2xl p-4 bg-surface-container/80 border border-white/80 text-primary shadow-inner">
+                  <p class="font-body-md text-xs tracking-wide leading-relaxed text-on-surface" id="cand-live-sql-preview">
+                    UPDATE Candidate SET notice_period = 'Immediate', current_title = 'Lead AI Search Engineer' WHERE candidate_id = 'cand_001';
+                  </p>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-black/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="font-label-sm text-xs text-text-medium" id="edit-status-feedback">
+                  Transactions executed atomically with rollback assurance.
+                </span>
+                <button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-on-primary font-body-md text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-md" type="submit">
+                  <span>Save &amp; Commit Updates (UPDATE Candidate)</span>
+                  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </article>
+
+        <!-- CARD B: Candidacy Lifecycle & Danger Zone (CRUD DML: DELETE) -->
+        <article class="lg:col-span-4 rounded-3xl glass-specular p-8 flex flex-col justify-between gap-6">
+          <div class="space-y-6">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blob-coral/30 text-on-surface font-label-sm text-xs mb-2 border border-blob-coral/50">
+                <span class="material-symbols-outlined text-[14px] text-error">security</span>
+                <span>Transaction Safety Active</span>
+              </div>
+              <h2 class="font-headline text-2xl text-primary">Candidacy Lifecycle &amp; Danger Zone</h2>
+              <span class="inline-block mt-1 font-label-sm text-xs text-text-medium">
+                CRUD DML: DELETE
+              </span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-surface-container-low/80 border border-white/80 space-y-2">
+              <p class="font-body-md text-xs text-text-medium leading-relaxed">
+                Withdrawing removes your entity from active ranking tables and cascades across submission views.
+              </p>
+              <div class="flex items-start gap-2 pt-2 border-t border-black/5 text-text-medium">
+                <span class="material-symbols-outlined text-[16px] text-error">warning</span>
+                <span class="font-label-sm text-[11px]">
+                  Evaluated embeddings, calibration logs, and downstream leaderboard rankings will be unlinked immediately.
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-lowest/70 border border-white/80">
+                <div class="flex flex-col">
+                  <span class="font-body-md text-xs text-primary font-medium">Cascade delete enabled</span>
+                  <span class="font-label-sm text-[10px] text-text-medium">FK constraint: ON_DELETE CASCADE</span>
+                </div>
+                <div class="w-10 h-6 rounded-full bg-primary p-0.5 flex items-center justify-end cursor-pointer">
+                  <div class="w-5 h-5 rounded-full bg-on-primary"></div>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-2xl bg-surface-container-lowest/40 border border-white/60 space-y-1">
+                <span class="font-label-sm text-[11px] text-text-medium block">Affected tables in foreign key graph:</span>
+                <div class="flex flex-wrap gap-1.5 pt-1">
+                  <span class="px-2 py-0.5 rounded-full bg-surface-container text-text-medium font-label-sm text-[10px] border border-white/80">Candidate_Skills</span>
+                  <span class="px-2 py-0.5 rounded-full bg-surface-container text-text-medium font-label-sm text-[10px] border border-white/80">Audit_Logs</span>
+                  <span class="px-2 py-0.5 rounded-full bg-surface-container text-text-medium font-label-sm text-[10px] border border-white/80">Score_Vector</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-black/5">
+            <button id="btn-delete-candidate" onclick="submitCandidateWithdrawal()" class="w-full py-3 px-6 rounded-full border border-red-300 text-red-600 hover:bg-red-50 font-body-md text-xs flex items-center justify-center gap-2 transition-all shadow-xs" type="button">
+              <span class="material-symbols-outlined text-[16px]">delete_forever</span>
+              <span>Withdraw Candidacy (DELETE FROM Candidate)</span>
+            </button>
+            <span class="block text-center text-[10px] text-text-medium mt-2">Requires confirmation before permanent ledger pruning.</span>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- Recruiter Reasoning Card for Logged In Candidate -->
+      <section class="glass-specular rounded-3xl p-6 mb-12">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-lg">psychology</span>
+          <h3 class="font-headline text-lg font-bold">Recruiter Deterministic Evaluation &amp; Match Reasoning</h3>
+        </div>
+        <p class="font-body-md text-sm italic text-text-primary bg-white/60 rounded-2xl p-4 border border-white/80 leading-relaxed" id="cand-eval-reasoning">
+          "Strong core IR match with high GitHub pedigree. Notice period calibration satisfies immediate deployment criteria."
+        </p>
+      </section>
+
+    </div>
 
   </div>
 
-  <!-- Bottom Floating Selection Bar (Appears when 2+ candidates selected) -->
-  <div id="compare-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 glass-card rounded-full px-6 py-3.5 flex items-center space-x-5 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+
+  <!-- ================================================================= -->
+  <!-- SLIDE-UP RELATIONAL SQL CONSOLE & TERMINAL (FOR VIVA / GRADING)   -->
+  <!-- ================================================================= -->
+  <div id="sql-terminal-drawer" class="fixed bottom-0 left-0 right-0 z-50 bg-[#121417] text-white shadow-2xl border-t border-white/10 transition-transform duration-300 translate-y-[calc(100%-48px)]">
+    
+    <!-- Drawer Toggle Header -->
+    <div class="px-6 py-3 bg-[#1A1C20] flex items-center justify-between cursor-pointer border-b border-white/5 select-none" id="btn-toggle-sql-drawer" onclick="toggleSqlDrawer()">
+      <div class="flex items-center space-x-3">
+        <span class="material-symbols-outlined text-emerald-400 text-sm">terminal</span>
+        <span class="font-mono text-xs font-bold text-white tracking-wider">DATABASE SYSTEMS EVALUATION CONSOLE — DUCKDB 3NF ENGINE</span>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">LIVE RELATIONAL TRACE</span>
+      </div>
+      <div class="flex items-center space-x-3 text-xs text-text-medium">
+        <span id="terminal-status-hint" class="font-mono text-[11px] text-gray-400">Click to expand query sandbox &amp; transaction log</span>
+        <span class="material-symbols-outlined text-sm transition-transform duration-200" id="terminal-chevron">keyboard_arrow_up</span>
+      </div>
+    </div>
+
+    <!-- Terminal Drawer Content -->
+    <div class="p-6 max-w-7xl mx-auto h-[460px] overflow-hidden flex flex-col">
+      <!-- Tabs -->
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+        <div class="flex space-x-2">
+          <button id="tab-btn-logs" onclick="switchTerminalTab('logs')" class="bg-white/10 text-white px-3.5 py-1 rounded text-xs font-mono font-medium hover:bg-white/20 transition">1. Live DML Transaction Feed</button>
+          <button id="tab-btn-sandbox" onclick="switchTerminalTab('sandbox')" class="text-gray-400 px-3.5 py-1 rounded text-xs font-mono font-medium hover:text-white transition">2. Interactive SQL Sandbox</button>
+        </div>
+        <div class="flex space-x-2 text-xs">
+          <button class="preset-sql-btn glass-pill bg-white/5 text-gray-300 px-2.5 py-1 rounded text-[11px] font-mono hover:bg-white/15" data-sql="SELECT c.candidate_id, c.name, c.current_company, s.notice_period_days, r.score FROM Candidate c INNER JOIN RedrobSignals s USING(candidate_id) INNER JOIN RankingSubmission r USING(candidate_id) ORDER BY r.score DESC LIMIT 5;">Preset: 3-Table JOIN</button>
+          <button class="preset-sql-btn glass-pill bg-white/5 text-gray-300 px-2.5 py-1 rounded text-[11px] font-mono hover:bg-white/15" data-sql="SELECT * FROM v_immediate_product_engineers LIMIT 5;">Preset: View Query</button>
+          <button class="preset-sql-btn glass-pill bg-white/5 text-gray-300 px-2.5 py-1 rounded text-[11px] font-mono hover:bg-white/15" data-sql="SELECT is_product_co, COUNT(*) AS count, AVG(total_exp_years) AS avg_yoe FROM Candidate GROUP BY is_product_co;">Preset: Aggregates</button>
+        </div>
+      </div>
+
+      <!-- Tab 1: Live Logs -->
+      <div id="terminal-tab-logs" class="flex-1 overflow-y-auto space-y-2 font-mono text-xs pr-2">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Tab 2: Interactive Sandbox -->
+      <div id="terminal-tab-sandbox" class="hidden flex-1 flex flex-col">
+        <div class="flex space-x-3 mb-3">
+          <textarea id="sql-input-query" rows="2" class="flex-1 bg-black/60 border border-white/15 rounded p-2.5 font-mono text-xs text-emerald-300 focus:outline-none focus:border-emerald-400" placeholder="Type raw SQL query here... (e.g. SELECT name, current_company FROM Candidate WHERE total_exp_years > 7;)"></textarea>
+          <button id="btn-run-custom-sql" onclick="executeCustomSql()" class="bg-emerald-500 text-black font-mono font-bold text-xs px-5 rounded hover:bg-emerald-400 transition">
+            Execute SQL
+          </button>
+        </div>
+        <div id="sandbox-output" class="flex-1 bg-black/40 border border-white/10 rounded p-3 overflow-auto font-mono text-xs text-gray-300">
+          <span class="text-gray-500">Run a custom query above or click a preset button to test...</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- STITCH SCREEN 2: Candidate Deep-Dive Audit Drawer -->
+  <div id="drawer-modal" class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex justify-end opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-full max-w-2xl bg-[#FAF9F7] h-full shadow-2xl overflow-y-auto p-8 border-l border-white/60 relative translate-x-full transition-transform duration-300" id="drawer-content">
+      <button id="btn-close-drawer" class="absolute top-6 right-6 w-9 h-9 rounded-full glass-pill flex items-center justify-center text-text-medium hover:text-black transition">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+      <div id="drawer-body"></div>
+    </div>
+  </div>
+
+  <!-- STITCH SCREEN 3: Candidate Comparative Analysis Modal -->
+  <div id="compare-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-full max-w-5xl bg-[#FAF9F7] max-h-[90vh] rounded-4xl shadow-2xl overflow-y-auto p-8 border border-white/60 relative scale-95 transition-transform duration-300" id="compare-modal-content">
+      <button id="btn-close-compare" class="absolute top-6 right-6 w-9 h-9 rounded-full glass-pill flex items-center justify-center text-text-medium hover:text-black transition">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+      <div class="mb-6">
+        <div class="text-xs uppercase tracking-widest text-text-medium font-medium mb-1">Assay Intelligence • Finalist Audit</div>
+        <h2 class="font-headline text-3xl font-bold text-text-primary">Candidate Comparative Analysis</h2>
+        <p class="text-xs text-text-medium mt-1">Multi-signal synchronized vector matrix evaluation across top selected engineers.</p>
+      </div>
+      <div id="compare-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Floating Compare Bar -->
+  <div id="compare-bar" class="fixed bottom-14 left-1/2 -translate-x-1/2 z-40 glass-specular rounded-full px-6 py-3.5 flex items-center space-x-5 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
     <div class="flex items-center space-x-2">
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-      <span class="text-xs font-semibold text-text-primary" id="selected-count">0 Candidates Selected</span>
+      <span class="text-xs font-semibold text-text-primary" id="selected-count">0 Selected</span>
     </div>
     <div class="h-4 w-px bg-black/10"></div>
     <button id="btn-open-compare" class="bg-black text-white text-xs font-medium px-5 py-2 rounded-full hover:bg-black/85 transition flex items-center space-x-1.5 shadow-md">
@@ -267,45 +995,7 @@
     </button>
   </div>
 
-  <!-- Screen 2: Candidate Deep-Dive Audit & Explainability Drawer / Modal -->
-  <div id="drawer-modal" class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex justify-end opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="w-full max-w-2xl bg-[#FAF9F7] h-full shadow-2xl overflow-y-auto p-8 border-l border-white/60 relative translate-x-full transition-transform duration-300" id="drawer-content">
-      
-      <!-- Close Button -->
-      <button id="btn-close-drawer" class="absolute top-6 right-6 w-9 h-9 rounded-full glass-pill flex items-center justify-center text-text-medium hover:text-black transition">
-        <span class="material-symbols-outlined text-lg">close</span>
-      </button>
-
-      <!-- Drawer Content Container -->
-      <div id="drawer-body">
-        <!-- Rendered dynamically by app.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Screen 3: Candidate Comparative Analysis Modal -->
-  <div id="compare-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="w-full max-w-5xl bg-[#FAF9F7] max-h-[90vh] rounded-4xl shadow-2xl overflow-y-auto p-8 border border-white/60 relative scale-95 transition-transform duration-300" id="compare-modal-content">
-      
-      <!-- Close Button -->
-      <button id="btn-close-compare" class="absolute top-6 right-6 w-9 h-9 rounded-full glass-pill flex items-center justify-center text-text-medium hover:text-black transition">
-        <span class="material-symbols-outlined text-lg">close</span>
-      </button>
-
-      <div class="mb-6">
-        <div class="text-xs uppercase tracking-widest text-text-medium font-medium mb-1">Assay Intelligence • Finalist Audit</div>
-        <h2 class="font-serif text-3xl font-bold text-text-primary">Candidate Comparative Analysis</h2>
-        <p class="text-xs text-text-medium mt-1">Multi-signal synchronized vector matrix evaluation across top selected engineers.</p>
-      </div>
-
-      <!-- Comparison Columns Container -->
-      <div id="compare-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Rendered dynamically by app.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Core Interactive Script -->
+  <!-- Main JavaScript File -->
   <script src="/app.js"></script>
 </body>
 </html>
