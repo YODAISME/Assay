@@ -92,10 +92,18 @@ class RelationalCandidateEngine:
             );
         """)
 
-        # 2. Populate tables from v2/submission.csv and v2/survivors.csv
-        sub_df = pd.read_csv(SUBMISSION_PATH)
-        surv_df = pd.read_csv(SURVIVORS_PATH)
-        merged = sub_df.merge(surv_df, on="candidate_id", how="left")
+        # 2. Populate tables from v2/submission.csv and v2/survivors.csv (or finalists_seed.csv)
+        FINALISTS_SEED_PATH = os.path.join(PROJECT_ROOT, "backend", "finalists_seed.csv")
+        if os.path.exists(SURVIVORS_PATH) and os.path.exists(SUBMISSION_PATH):
+            sub_df = pd.read_csv(SUBMISSION_PATH)
+            surv_df = pd.read_csv(SURVIVORS_PATH)
+            merged = sub_df.merge(surv_df, on="candidate_id", how="left")
+        elif os.path.exists(FINALISTS_SEED_PATH):
+            merged = pd.read_csv(FINALISTS_SEED_PATH)
+        elif os.path.exists(SUBMISSION_PATH):
+            merged = pd.read_csv(SUBMISSION_PATH)
+        else:
+            raise FileNotFoundError("Could not find candidate seed data (finalists_seed.csv or submission.csv).")
 
         PRODUCT_COMPANIES = {
             'cred', 'swiggy', 'zomato', 'pharmeasy', 'flipkart', 'meesho', 'razorpay',
