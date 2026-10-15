@@ -1,5 +1,8 @@
 @echo off
+echo Cleaning up any orphaned processes on port 8000...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000 ^| findstr LISTENING') do (
+    taskkill /F /PID %%a 2>nul
+)
 echo Starting Assay Web Application (Liquid Light UI)...
-echo Opening http://localhost:8000 in your browser...
-python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
+python run_app.py
 pause
